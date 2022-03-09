@@ -21,7 +21,7 @@ public class ImageDao implements Dao<Image> {
   private final Map<Long, Image> images = new HashMap<>();
 
   public ImageDao() {    
-    String imgRepo = new String("/Users/vvercasson/Universite/S6/PDL/Projet_PDL/pdl-client-serveur/backend/src/main/resources/images");
+    String imgRepo = new String("/mnt/c/Users/Martin/Desktop/L3Info/S6/pdl/projetPDL/Projet_PDL/backend/src/main/resources/images");
     //final ClassPathResource imageRepo = new ClassPathResource(imgRepo);
     File f = new File(imgRepo);
     if (!(f.exists()) || !(f.isDirectory()) ) {
