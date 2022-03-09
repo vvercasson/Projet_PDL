@@ -27,24 +27,24 @@ public class ImageDao implements Dao<Image> {
     if (!(f.exists()) || !(f.isDirectory()) ) {
       System.err.println("images either doesn't exist or isn't a directory");
     }
-
-    // RECURSIFFFFF
-    File[] fileList = f.listFiles();
-    for (File imgF : fileList) {
-      if(imgF.isDirectory()) {
-        parcourtRepo(imgF);
-      }
-      else {
-        addImage(imgF.getParentFile().getName(), imgF);
-      }
-    }    
+ 
+    parcourtRepo(f, f.getName());
   }
 
-  public void parcourtRepo(File repo) {
-    File[] listRepo = repo.listFiles();
-    for (File file : listRepo) {
-      if(file.isDirectory()) {
-        // parcourtRepo();
+  public void parcourtRepo(File f, String name) {
+    File[] fileList = f.listFiles();
+    if(fileList != null) {
+      System.err.println("Repository doesn't exist");
+    }
+    for (File file : fileList) {
+      if(file.getName().endsWith(".jpg") || file.getName().endsWith(".png")) {
+        addImage(name, file);
+      }
+      else if(file.isDirectory()) {
+        parcourtRepo(file, name + "/" + file.getName());
+      }
+      else {
+        System.err.println("Files need to be jpg or png");
       }
     }
   }

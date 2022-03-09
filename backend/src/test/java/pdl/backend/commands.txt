@@ -1,0 +1,5 @@
+Launch backend : 
+mvn spring-boot:run
+
+Launch frontend:
+code frontend
