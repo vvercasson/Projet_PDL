@@ -1,10 +1,21 @@
 package pdl.backend;
 
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLConnection;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+
+import javax.imageio.ImageIO;
+import javax.print.attribute.standard.Media;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -24,6 +35,14 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import boofcv.factory.transform.wavelet.GFactoryWavelet;
+import boofcv.io.image.ConvertBufferedImage;
+import boofcv.io.image.UtilImageIO;
+import boofcv.struct.image.GrayU8;
+import boofcv.struct.image.Planar;
+import imageprocessing.ColorLevelProcessing;
+import imageprocessing.GrayLevelProcessing;
+
 @RestController
 public class ImageController {
 
@@ -42,11 +61,12 @@ public class ImageController {
 
     Optional<Image> image = imageDao.retrieve(id);
 
+
     if (image.isPresent()) {
       InputStream inputStream = new ByteArrayInputStream(image.get().getData());
       return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(new InputStreamResource(inputStream));
     }
-    return new ResponseEntity<>("Image id=" + id + " not found.", HttpStatus.NOT_FOUND);
+    return new ResponseEntity<>("Image id=" + id + " not found. 404 error", HttpStatus.NOT_FOUND);
   }
 
   @RequestMapping(value = "/images/{id}", method = RequestMethod.DELETE)
@@ -65,8 +85,8 @@ public class ImageController {
   public ResponseEntity<?> addImage(@RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {
 
     String contentType = file.getContentType();
-    if (!contentType.equals(MediaType.IMAGE_JPEG.toString())) {
-      return new ResponseEntity<>("Only JPEG file format supported", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+    if (!contentType.equals(MediaType.IMAGE_JPEG.toString()) && !contentType.equals(MediaType.IMAGE_PNG.toString())) {
+      return new ResponseEntity<>("415 Unsupported Media Type", HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
     try {
@@ -74,21 +94,51 @@ public class ImageController {
     } catch (IOException e) {
       return new ResponseEntity<>("Failure to read file", HttpStatus.NO_CONTENT);
     }
-    return new ResponseEntity<>("Image uploaded", HttpStatus.OK);
+    return new ResponseEntity<>("201 Created", HttpStatus.OK);
   }
 
   @RequestMapping(value = "/images", method = RequestMethod.GET, produces = "application/json")
   @ResponseBody
-  public ArrayNode getImageList() {
+  public ArrayNode getImageList() throws IOException {
     List<Image> images = imageDao.retrieveAll();
     ArrayNode nodes = mapper.createArrayNode();
     for (Image image : images) {
+      File file =  new File(image.getName());
+      Path path = file.toPath();
+      String type = Files.probeContentType(path);
+
+      //BufferedImage bufferedImage = (BufferedImage)ImageIO.read(file);
+      //int width = bufferedImage.getWidth();
+      
       ObjectNode objectNode = mapper.createObjectNode();
       objectNode.put("id", image.getId());
       objectNode.put("name", image.getName());
+      objectNode.put("type",type); // a revoir avec MediaType
+      objectNode.put("size","null");
       nodes.add(objectNode);
     }
     return nodes;
   }
+
+  @RequestMapping(value = "/images/{id}")
+  @ResponseBody
+  public String executeAlgorithm(@PathVariable("id") long id,@RequestParam("algorithm") String algo,@RequestParam String p1,@RequestParam("p2") Optional<String> p2){
+    Optional<Image> image = imageDao.retrieve(id);
+    if (image.isPresent()) {
+      String inputPath = "./src/main/resources/images/"+image.get().getName();
+      BufferedImage input = UtilImageIO.loadImage(inputPath);
+      Planar<GrayU8> imagein = ConvertBufferedImage.convertFromPlanar(input, null, true, GrayU8.class);
+      return "lightColor executed";
+      /*if (algo == "lightColor"){
+        ColorLevelProcessing.lightColor(imagein,Integer.parseUnsignedInt(p1));
+        String outputPath = "./result.jpg";
+        UtilImageIO.saveImage(imagein, outputPath);
+		    System.out.println("Image saved in: " + outputPath);
+      }*/
+
+    }
+    return "error";
+  }
+  
 
 }

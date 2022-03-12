@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
+import java.awt.image.BufferedImage;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Repository;
@@ -21,7 +22,7 @@ public class ImageDao implements Dao<Image> {
   private final Map<Long, Image> images = new HashMap<>();
 
   public ImageDao() {    
-    String imgRepo = new String("/mnt/c/Users/Martin/Desktop/L3Info/S6/pdl/projetPDL/Projet_PDL/backend/src/main/resources/images");
+    String imgRepo = new String("./src/main/resources/images");
     //final ClassPathResource imageRepo = new ClassPathResource(imgRepo);
     File f = new File(imgRepo);
     if (!(f.exists()) || !(f.isDirectory()) ) {

@@ -33,7 +33,7 @@
     		<artifactId>boofcv-core</artifactId>
     		<version>0.40</version>
     	</dependency>
-		</dependencies>
+	</dependencies>
 
 	<build>
 		<plugins>
