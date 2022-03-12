@@ -120,7 +120,7 @@ public class ImageController {
     return nodes;
   }
 
-  @RequestMapping(value = "/images/{id}")
+  /*@RequestMapping(value = "/images/{id}")
   @ResponseBody
   public String executeAlgorithm(@PathVariable("id") long id,@RequestParam("algorithm") String algo,@RequestParam String p1,@RequestParam("p2") Optional<String> p2){
     Optional<Image> image = imageDao.retrieve(id);
@@ -134,11 +134,11 @@ public class ImageController {
         String outputPath = "./result.jpg";
         UtilImageIO.saveImage(imagein, outputPath);
 		    System.out.println("Image saved in: " + outputPath);
-      }*/
+      }
 
     }
     return "error";
-  }
+  }*/
   
 
 }

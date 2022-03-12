@@ -16,11 +16,27 @@ api.getImageList()
 </script>
 
 <template>
-  <div>
+  <div id="carousel">
     <h3>Gallery</h3>
-    <Image v-for="image in imageList" :id="image.id" />
+    <div id="imageCarousel">
+      <Image v-for="image in imageList" :id="image.id" />
+    </div>
   </div>
 </template>
 
 <style scoped>
+  #carousel {width: 80%; max-width: 1000px;}
+  #carousel #imageCarousel {
+    position: relative;
+    width: 500%;
+    margin: 0;
+    padding: 0;
+    text-align: left;
+  }
+
+  Image{
+    width: 20%; 
+    height: auto; 
+    float: left;
+  }
 </style>
