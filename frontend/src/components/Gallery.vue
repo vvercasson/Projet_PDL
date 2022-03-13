@@ -36,7 +36,7 @@ api.getImageList()
   </div>
 </template>
 
-<style scoped>
+<style>
   #carousel {width: 80%; max-width: 1000px;}
   #carousel #imageCarousel {
     position: relative;

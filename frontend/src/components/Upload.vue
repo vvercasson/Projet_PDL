@@ -17,6 +17,11 @@ function submitFile() {
     }).catch(e => {
       console.log(e.message);
     });
+
+    var text = document.createElement("h4");
+    text.textContent = "Image Upload !";
+    var divUpload = document.getElementById("divUpload");
+    divUpload?.appendChild(text);
   }
 }
 
@@ -28,7 +33,7 @@ function handleFileUpload(event: Event) {
 <template>
   <div>
     <h3>Upload an image</h3>
-    <div>
+    <div id ="divUpload">
       <input type="file" id="file" ref="file" @change="handleFileUpload" />
     </div>
     <div>
