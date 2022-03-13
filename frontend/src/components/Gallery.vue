@@ -2,7 +2,9 @@
 import { ref } from 'vue'
 import { api } from '@/http-api';
 import { ImageType } from '@/image'
+import router from "@/router";
 import Image from './Image.vue';
+import func from '../../vue-temp/vue-editor-bridge';
 
 const imageList = ref<ImageType[]>([]);
 
@@ -13,13 +15,20 @@ api.getImageList()
   .catch(e => {
     console.log(e.message);
   });
+
+  function showImageGalery(event){ 
+    console.log(event);
+    //router.push({ name: 'image', params: {id: event.target.id}});
+  }
 </script>
 
 <template>
-  <div id="carousel">
+  <div>
     <h3>Gallery</h3>
-    <div id="imageCarousel">
-      <Image v-for="image in imageList" :id="image.id" />
+    <div id="carousel">
+      <div id="imageCarousel">
+      <Image v-for="image in imageList" :id="image.id" :key="image.id" @click="showImageGalery($event)"/>
+    </div>
     </div>
   </div>
 </template>

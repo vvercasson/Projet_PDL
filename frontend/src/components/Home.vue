@@ -39,7 +39,7 @@ function showImage(event)  {
     var divHide = document.getElementById("Filtres")?.style.visibility;
     if (divHide == 'hidden') {
                 document.getElementById("Filtres").style.visibility = 'visible';
-            }
+    }
   }
 }
 </script>
