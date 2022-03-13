@@ -16,19 +16,22 @@ api.getImageList()
     console.log(e.message);
   });
 
-  function showImageGalery(event){ 
-    console.log(event);
+  function showImageGalery(image){ 
     //router.push({ name: 'image', params: {id: event.target.id}});
+    var url = 'images/'+image
+    return url;
+  }
+
+  function clickImg(id){
+    router.push({ name: 'image', params: {id: id}});
   }
 </script>
 
 <template>
+  <h3>Gallery</h3>
   <div>
-    <h3>Gallery</h3>
-    <div id="carousel">
-      <div id="imageCarousel">
-      <Image v-for="image in imageList" :id="image.id" :key="image.id" @click="showImageGalery($event)"/>
-    </div>
+    <div id = "carousselImg">
+      <img :id="image.name" :key="image.id" v-for="image in imageList" :src="showImageGalery(image.id)" @click="clickImg(image.id)">
     </div>
   </div>
 </template>
