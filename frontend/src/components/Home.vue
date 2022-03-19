@@ -8,6 +8,7 @@ const selectedId = ref(-1);
 const imageList = ref<ImageType[]>([]);
 getImageList();
 
+
 function getImageList() {
   api.getImageList().then((data) => {
     imageList.value = data;
@@ -17,8 +18,9 @@ function getImageList() {
 }
 
 function showImage(event)  {
+  console.log(event.target);
   var imageid = event.target.value;
-  //router.push({ name: 'image', params: { id: selectedId.value } })
+  //router.push({ name: 'selectorImage', params: { id: imageid } })
   const imageShow = document.getElementById("image");
   if (imageShow !== null) {
     var varP = document.getElementById("divImage");
@@ -42,6 +44,7 @@ function showImage(event)  {
     }
   }
 }
+
 </script>
 
 <template>
@@ -54,6 +57,7 @@ function showImage(event)  {
     </div>
   </div>
 
+  <br>
   <div id="image"></div>
 
   <div style="visibility: hidden;" id="Filtres">
@@ -98,7 +102,7 @@ function showImage(event)  {
 
 <style>
   #divImage{
-    width: 500px;
-    height: 500px;
+    width: 300px;
+    height: 300px;
   }
 </style>

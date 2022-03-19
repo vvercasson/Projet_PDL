@@ -107,14 +107,20 @@ public class ImageController {
       Path path = file.toPath();
       String type = Files.probeContentType(path);
 
+      InputStream inputStream = new ByteArrayInputStream(image.getData());
+
+      BufferedImage bufferedImage = ImageIO.read(inputStream);
+
       //BufferedImage bufferedImage = (BufferedImage)ImageIO.read(file);
-      //int width = bufferedImage.getWidth();
+      int width = bufferedImage.getWidth();
+      int height = bufferedImage.getHeight();
+      int typeImg = bufferedImage.getType();
       
       ObjectNode objectNode = mapper.createObjectNode();
       objectNode.put("id", image.getId());
       objectNode.put("name", image.getName());
       objectNode.put("type",type); // a revoir avec MediaType
-      objectNode.put("size","null");
+      objectNode.put("size",width+"x"+height+"x"+typeImg);
       nodes.add(objectNode);
     }
     return nodes;

@@ -25,6 +25,12 @@ const routes: Array<RouteRecordRaw> = [
     name: "upload",
     component: () => import("./components/Upload.vue"),
     props: true
+  },
+  {
+    path: "/selectorImage/:id",
+    name: "selectorImage",
+    component : () => import("./components/SelectorImage.vue"),
+    props: ({ params }) => ({id: Number(params.id) || 0})
   }
 ];
 
