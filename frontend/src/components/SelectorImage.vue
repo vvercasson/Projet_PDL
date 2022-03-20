@@ -3,6 +3,8 @@ import { defineProps, ref } from 'vue';
 import router from "@/router";
 import { api } from '@/http-api';
 import { ImageType } from '@/image';
+import axios from 'axios';
+import { report } from 'process';
 
 const props = defineProps<{ id: number}>();
 
@@ -64,6 +66,30 @@ api.getImage(props.id)
       desc?.appendChild(pSize);
     }
   }
+
+  function saveImg(){
+    api.getImage(props.id)
+    .then((data: Blob) =>{
+      var url = window.URL.createObjectURL(data);
+      var enregister = document.createElement('a');
+      enregister.href = url;
+      console.log(url);
+      var type = "";
+      switch(data.type){
+        case "image/jpeg" || "image/jpg":
+          type = "jpg";
+          break;
+        case "image/png":
+          type = "png";
+          break;
+      }
+
+      enregister.setAttribute('download','image.'+type);
+      document.body.appendChild(enregister);
+
+      enregister.click();
+    });
+  }
 </script>
 
 <template>
@@ -72,9 +98,14 @@ api.getImage(props.id)
   <div id="description">
     <div v-for="image in imageList" :key="image.id" >{{showDescription(image)}}</div>
   </div>
-   <div id="Filtres">
-    <div id = "supprimer">
+  <div id="Filtres">
+    <div id="Boutons">
+      <div id = "supprimer">
         <button id="btDelete" @click="supprImg">supprimer</button>
+      </div>
+      <div id = "telecharger">
+        <button id="btSave" @click="saveImg">enregister</button>
+      </div>
     </div>
     <div id = "luminosite">
       <h3 id="light">Luminosité</h3>

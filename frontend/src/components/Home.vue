@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import router from "@/router";
 import { api } from '@/http-api';
 import { ImageType } from '@/image'
+import func from '../../vue-temp/vue-editor-bridge';
 
 const selectedId = ref(-1);
 const imageList = ref<ImageType[]>([]);
@@ -40,10 +41,11 @@ function showImage(event)  {
     // show filter div
     var divHide = document.getElementById("Filtres")?.style.visibility;
     if (divHide == 'hidden') {
-                document.getElementById("Filtres").style.visibility = 'visible';
+       document.getElementById("Filtres").style.visibility = 'visible';
     }
   }
 }
+
 
 </script>
 
