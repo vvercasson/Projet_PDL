@@ -37,16 +37,44 @@ public class ColorLevelProcessing {
 			for (int x = 0; x < input.width; ++x) {
                 for (int i = 0; i < input.getNumBands(); i++){
                     int gl = input.getBand(i).get(x, y);
+					// System.out.println("Old value for band number " + i + " is " + gl);
                     if (gl+delta > min && gl+delta < max)
                         input.getBand(i).set(x, y, gl+delta);
                     else{
                         gl = 255;
                         input.getBand(i).set(x, y, gl);
                     }
+					// System.out.println("New value for band number " + i + " is " + input.getBand(i).get(x, y));
                 }
 			}
 		}
 	}
+
+	public static void lightColor2(Planar<GrayU8> input, Planar<GrayU8> output, int delta){
+		int min = 0;
+		int max = 255;
+	for (int y = 0; y < input.height; ++y) {
+		for (int x = 0; x < input.width; ++x) {
+			for (int i = 0; i < input.getNumBands(); i++){
+				if(i<3) {
+					int gl = input.getBand(i).get(x, y);
+				// System.out.println("Old value for band number " + i + " is " + gl);
+				if (gl+delta > min && gl+delta < max)
+					output.getBand(i).set(x, y, gl+delta);
+				else{
+					gl = 255;
+					output.getBand(i).set(x, y, gl);
+				}
+				}
+				else {
+					output.getBand(i).set(x, y, input.getBand(i).get(x, y));
+				}
+				
+				// System.out.println("New value for band number " + i + " is " + input.getBand(i).get(x, y));
+			}
+		}
+	}
+}
 
 	public static void meanFilterColor(Planar<GrayU8> input, Planar<GrayU8> output, int size){
 		if(size%2 == 0) {size= size - 1;}
@@ -106,6 +134,19 @@ public class ColorLevelProcessing {
 			}
 		}
 		return gray;
+	}
+
+	public static void convertToGray2(Planar<GrayU8> input, GrayU8 output) {
+		for (int y = 0; y < input.height;y++) {
+			for(int x = 0; x < input.width; x++){
+				int r = 0;
+				double red = (input.getBand(0).get(x,y))*0.3;
+				double green = (input.getBand(1).get(x,y))*0.59;
+				double blue = (input.getBand(2).get(x,y))*0.11;
+				r = (int)(red+green+blue);
+				output.set(x, y, r);
+			}
+		}
 	}
 
 	static void rgbToHsv(int r, int g, int b, float[] hsv){
