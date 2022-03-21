@@ -10,7 +10,7 @@ const props = defineProps<{ id: number}>();
 
 const imageList = ref<ImageType[]>([]);
 
-api.getImageList()
+api.getImageList() // fonction qui récupère la liste des images
   .then((data) => {
     imageList.value = data;
   })
@@ -18,24 +18,18 @@ api.getImageList()
     console.log(e.message);
   });
 
-api.getImage(props.id)
+api.getImage(props.id) // fonction qui recupere l'image avec l'id
   .then((data: Blob) => {
     const reader = new window.FileReader();
-    reader.readAsDataURL(data);
+    reader.readAsDataURL(data); // transforme le Blob sous forme d'URL
     reader.onload = () => {
-      const galleryElt = document.getElementById("gallery");
+      const galleryElt = document.getElementById("image"); // récupération du div image
       if (galleryElt !== null) {
-        const imgElt = document.createElement("img");
-        galleryElt.appendChild(imgElt);
+        const imgElt = document.createElement("img"); // creation d'une balise img
+        galleryElt.appendChild(imgElt); // ajout de l'image au div image
         if (imgElt !== null && reader.result as string) {
-          imgElt.setAttribute("src", (reader.result as string));
+          imgElt.setAttribute("src", (reader.result as string)); // on ajoute l'image en tant que src de la balise
         }
-        /*const divDescription = document.createElement("div");
-        const h4 = document.createElement("h4");
-        const titreH4 = document.createTextNode("Description");
-        h4.appendChild(titreH4);
-        divDescription.appendChild(h4);
-        galleryElt.appendChild(divDescription);*/
       }
     };
   })
@@ -44,21 +38,28 @@ api.getImage(props.id)
   });
 
   function supprImg(){
-    api.deleteImage(props.id);
-    router.push({ name: 'home'})
+    api.deleteImage(props.id); // on applique la fonction qui efface l'image
+    router.push({ name: 'home'}) // redirection vers la Vue Home
   }
 
   function showDescription(image){
     if(image.id == props.id){
+
+      // Mise en place de la description contenant les méta données de l'image
+
+      // création des noms pour les balises p avec l'affichage des méta données de l'image
       const textSize = document.createTextNode("Taille : "+image.size);
       const textName = document.createTextNode("Nom : "+image.name);
       const textType = document.createTextNode("Type : "+image.type);
 
+      // création des balises texte en html
       const pSize = document.createElement("p").appendChild(textSize);
       const pName = document.createElement("p").appendChild(textName);
       const pType = document.createElement("p").appendChild(textType);
 
       const desc = document.getElementById("description");
+
+      // ajout des balises dans le div description
       desc?.appendChild(pName);
       desc?.appendChild(document.createElement("br"));
       desc?.appendChild(pType);
@@ -68,12 +69,11 @@ api.getImage(props.id)
   }
 
   function saveImg(){
-    api.getImage(props.id)
+    api.getImage(props.id) // utilisation de la fonction de récupération d'image
     .then((data: Blob) =>{
-      var url = window.URL.createObjectURL(data);
-      var enregister = document.createElement('a');
+      var url = window.URL.createObjectURL(data); // on créer un url avec le Blob
+      var enregister = document.createElement('a'); // on créer la balise a en html
       enregister.href = url;
-      console.log(url);
       var type = "";
       switch(data.type){
         case "image/jpeg" || "image/jpg":
@@ -84,16 +84,16 @@ api.getImage(props.id)
           break;
       }
 
-      enregister.setAttribute('download','image.'+type);
+      enregister.setAttribute('download','image.'+type); // quand l'image est enregistrée elle est sous forme image.jpg ou png
       document.body.appendChild(enregister);
 
-      enregister.click();
+      enregister.click(); // quand l'évenement de clique est effectué, l'enregistrement en local se fait
     });
   }
 </script>
 
 <template>
-  <figure id="gallery"></figure>
+  <figure id="image"></figure>
 
   <div id="description">
     <div v-for="image in imageList" :key="image.id" >{{showDescription(image)}}</div>
@@ -103,7 +103,6 @@ api.getImage(props.id)
     <div id = "supprimer">
       <button id="btDelete" @click="supprImg">supprimer</button>
     </div>
-    <br>
     <div id = "telecharger">
       <button id="btSave" @click="saveImg">enregister</button>
     </div>

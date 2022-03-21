@@ -40,17 +40,19 @@ api.getImageList()
     var button = document.createElement("button");
     button.append("supprimer");
     button.setAttribute("id","bt"+image.name);
+    button.setAttribute("onclick","supprImg(image.id)");
     //button.addEventListener("click",supprImg(image.id));
 
     var div = document.getElementById("carousselImg");
     var newDiv = document.createElement("div");
-    newDiv.setAttribute("id","divGallery");
+    newDiv.setAttribute("id",image.id);
 
     newDiv.appendChild(img);
     newDiv.appendChild(document.createElement("br"))
     newDiv.appendChild(button);
     div.appendChild(newDiv);
     
+    //button.click();
   }
 
 </script>
@@ -59,7 +61,7 @@ api.getImageList()
   <h3>Gallery</h3>
   <div>
     <div id = "carousselImg">
-      <img :id="image.name" :key="image.id" v-for="image in imageList" :src="showImageGalery(image)" @click="clickImg(image.id)" @load="btSuppr(image)">
+      <img :id="image.name" :key="image.id" v-for="image in imageList" :src="showImageGalery(image)" @click="clickImg(image.id)">
     </div>
   </div>
 </template>
