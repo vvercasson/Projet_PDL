@@ -113,6 +113,19 @@ public class Convolution {
     } 
   }
 
+  
+  public static void gradientImageSobel(GrayU8 input, GrayU8 output){
+
+    for(int y=1;y<input.height-1;y++){
+      for (int x=1;x<input.width-1;x++) {
+          int g1 = input.get(x+1,y)-input.get(x-1, y);
+          int g2 = input.get(x,y+1)-input.get(x, y-1);
+          int m = (int) Math.sqrt((g1*g1)+(g2*g2));
+          output.set(x, y, m);
+      }
+    } 
+  }
+
   public static void main(final String[] args) {
     // load image
     if (args.length < 2) {

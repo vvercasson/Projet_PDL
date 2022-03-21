@@ -2,6 +2,7 @@ package pdl.backend;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -41,6 +42,7 @@ import boofcv.io.image.UtilImageIO;
 import boofcv.struct.image.GrayU8;
 import boofcv.struct.image.Planar;
 import imageprocessing.ColorLevelProcessing;
+import imageprocessing.Convolution;
 import imageprocessing.GrayLevelProcessing;
 
 @RestController
@@ -57,14 +59,84 @@ public class ImageController {
   }
 
   @RequestMapping(value = "/images/{id}", method = RequestMethod.GET, produces = MediaType.IMAGE_JPEG_VALUE)
-  public ResponseEntity<?> getImage(@PathVariable("id") long id) {
+  public ResponseEntity<?> getImage(@PathVariable("id") long id, @RequestParam(value = "algorithm",required = false) Optional<String> algorithm, @RequestParam(value = "first",required = false) Optional<String> first, @RequestParam(value = "second",required = false) Optional<String> second ) {
 
     Optional<Image> image = imageDao.retrieve(id);
 
 
     if (image.isPresent()) {
       InputStream inputStream = new ByteArrayInputStream(image.get().getData());
-      return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(new InputStreamResource(inputStream));
+
+      // No algorithm applied if param is empty -> simply return original image
+      if(algorithm.isEmpty()) {
+        System.out.println("No algorithm applied");
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(new InputStreamResource(inputStream));
+      }
+      // There's an algorithm
+      else {
+        try {
+          BufferedImage input;
+          input = ImageIO.read(inputStream);
+          Planar<GrayU8> imagein = ConvertBufferedImage.convertFromPlanar(input, null, true, GrayU8.class);
+          Planar<GrayU8> imageout = imagein.createSameShape();
+
+          if(first.isEmpty()) {
+            // Seuls algo possibles : Contours / Hist / Teinte
+            if(algorithm.get().equals("contour")) {
+              GrayU8 transit = new GrayU8(imagein.width, imagein.height);
+
+              ColorLevelProcessing.convertToGray2(imagein,transit);
+              GrayU8 end = new GrayU8(imagein.width, imagein.height);
+              Convolution.gradientImageSobel(transit, end);
+
+              ByteArrayOutputStream os = new ByteArrayOutputStream();
+              BufferedImage output = ConvertBufferedImage.convertTo(end, null);
+
+              if(!ImageIO.write(output, "png", os)) {
+                System.err.println("** No writter found **");
+              }                          
+              InputStream is = new ByteArrayInputStream(os.toByteArray());
+
+              return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(new InputStreamResource(is));
+            }
+            else {
+              System.err.println("Unknown algorithm : " + algorithm.get() );
+              return new ResponseEntity<>("Algorithm : " + algorithm.get() + " not found. 400 Bad Request", HttpStatus.BAD_REQUEST); 
+            }
+          }
+          else {
+            // Seuls algo possibles : Luminosité / Flou
+
+            // Recuperation parametre first
+            int delta = Integer.parseInt(first.get());
+            if(algorithm.get().equals("luminosite")) {
+                ColorLevelProcessing.lightColor2(imagein,imageout, delta);          
+            }
+            else if(algorithm.get().equals("flou")) {
+              ColorLevelProcessing.meanFilterColor(imagein, imageout, delta);
+            }
+            // Add algo
+            else {
+              System.err.println("Unknown algorithm : " + algorithm.get() );
+              return new ResponseEntity<>("Algorithm : " + algorithm.get() + " not found. 400 Bad Request", HttpStatus.BAD_REQUEST);
+            }
+          }
+
+          // Creating output
+          ByteArrayOutputStream os = new ByteArrayOutputStream();
+          BufferedImage output = new BufferedImage(imagein.width, imagein.height, input.getType());
+          ConvertBufferedImage.convertTo(imageout,output,true);
+          // BufferedImage outBuffered = ConvertBufferedImage.convertTo_U8(imageout, null, false);
+          if(!ImageIO.write(output, "png", os)) {
+            System.err.println("** No writter found **");
+          }                          
+          InputStream is = new ByteArrayInputStream(os.toByteArray());
+
+          return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(new InputStreamResource(is));
+        } catch (IOException e1) {
+          e1.printStackTrace();
+        }        
+    }
     }
     return new ResponseEntity<>("Image id=" + id + " not found. 404 error", HttpStatus.NOT_FOUND);
   }
