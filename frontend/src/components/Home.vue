@@ -60,6 +60,13 @@ function showImage(event)  {
   </div>
 
   <br>
+
+  <div id = "gif">
+    <div id = "imgGif">
+      <iframe allowfullscreen="" frameBorder="0" height="100%" src="https://giphy.com/embed/qwpx3amXzX7GAmjg7C/video" style="left:0;position:absolute;top:0" width="100%"></iframe>
+    </div>
+  </div>
+
   <div id="image"></div>
 
   <div style="visibility: hidden;" id="Filtres">
@@ -106,5 +113,17 @@ function showImage(event)  {
   #divImage{
     width: 300px;
     height: 300px;
+  }
+
+  #gif {
+    width: 50%;
+    text-align: center;
+  }
+
+  #imgGif {
+    height:0;
+    padding-bottom:56.25%;
+    position:relative;
+    width:100%;
   }
 </style>

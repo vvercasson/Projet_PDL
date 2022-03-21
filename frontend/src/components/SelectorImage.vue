@@ -98,15 +98,17 @@ api.getImage(props.id)
   <div id="description">
     <div v-for="image in imageList" :key="image.id" >{{showDescription(image)}}</div>
   </div>
-  <div id="Filtres">
-    <div id="Boutons">
-      <div id = "supprimer">
-        <button id="btDelete" @click="supprImg">supprimer</button>
-      </div>
-      <div id = "telecharger">
-        <button id="btSave" @click="saveImg">enregister</button>
-      </div>
+  <br>
+  <div id="Boutons">
+    <div id = "supprimer">
+      <button id="btDelete" @click="supprImg">supprimer</button>
     </div>
+    <br>
+    <div id = "telecharger">
+      <button id="btSave" @click="saveImg">enregister</button>
+    </div>
+  </div>
+  <div id="Filtres">
     <div id = "luminosite">
       <h3 id="light">Luminosité</h3>
       <button id="increaseLight">-</button>
@@ -150,5 +152,16 @@ api.getImage(props.id)
   img {
     width: 300px; 
     height: 300px; 
+  }
+  #Filtres {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+  }
+
+  #luminosite {
+    grid-area: 1 / 1 / 2 / 2;
   }
 </style>
