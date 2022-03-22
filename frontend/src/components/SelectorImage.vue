@@ -13,6 +13,8 @@ const imageList = ref<ImageType[]>([]);
 
 const target = ref<Blob>();
 
+var selectValue = "";
+
 api.getImageList() // fonction qui récupère la liste des images
   .then((data) => {
     imageList.value = data;
@@ -42,7 +44,9 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
 
   function supprImg(){
     api.deleteImage(props.id); // on applique la fonction qui efface l'image
-    router.push({ name: 'home'}) // redirection vers la Vue Home
+    router.push({ name: 'home'}).then(() => {
+    window.location.reload();
+    }); // redirection vers la Vue Home
   }
 
   function showDescription(image){
@@ -118,23 +122,29 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
     if(event.target.id == "submitLight"){
       const algo = "luminosite";
       const first = document.getElementById("textLight").value;
-      api.getImageFilterOneParameters(props.id,algo,first)
-    .then((data : Blob) => {
-      target.value = data;
-      const reader = new window.FileReader();
-      reader.readAsDataURL(data);
-      reader.onload = () => {
-        const galleryElt = document.getElementById("imageFiltre");
-        if (galleryElt !== null) {
-          const imgElt = document.createElement("img");
-          imgElt.setAttribute("id","filtre");
-          galleryElt.appendChild(imgElt);
-          if (imgElt !== null && reader.result as string) {
-            imgElt.setAttribute("src", (reader.result as string)); 
-          }
-        }
-      };
-    });
+      if (first == 0){
+        alert("veuillez rentrer une valeur avant de valider !");
+      }
+
+      else{
+        api.getImageFilterOneParameters(props.id,algo,first)
+        .then((data : Blob) => {
+          target.value = data;
+          const reader = new window.FileReader();
+          reader.readAsDataURL(data);
+          reader.onload = () => {
+            const galleryElt = document.getElementById("imageFiltre");
+            if (galleryElt !== null) {
+              const imgElt = document.createElement("img");
+              imgElt.setAttribute("id","filtre");
+              galleryElt.appendChild(imgElt);
+              if (imgElt !== null && reader.result as string) {
+                imgElt.setAttribute("src", (reader.result as string)); 
+              }
+            }
+          };
+        });
+      }
     }
 
     if(event.target.id == "submitContour"){
@@ -158,6 +168,51 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
       });
     }
 
+    if(event.target.id == "blurButton"){
+      const algo = "flou";
+      if (selectValue == "Moyen"){
+        const first = "moyen";
+        const size = document.getElementById("blurLevel").value;
+        api.getImageFilterAllParameters(props.id,algo,first,size)
+        .then((data : Blob) => {
+          target.value = data;
+          const reader = new window.FileReader();
+          reader.readAsDataURL(data);
+          reader.onload = () => {
+          const galleryElt = document.getElementById("imageFiltre");
+          if (galleryElt !== null) {
+            const imgElt = document.createElement("img");
+            imgElt.setAttribute("id","filtre");
+            galleryElt.appendChild(imgElt);
+            if (imgElt !== null && reader.result as string) {
+              imgElt.setAttribute("src", (reader.result as string)); 
+            }
+          }
+        };
+        });
+      }
+      if(selectValue == "Gaussien"){
+        const first = "gaussien";
+        api.getImageFilterOneParameters(props.id,algo,first)
+        .then((data : Blob) => {
+          target.value = data;
+          const reader = new window.FileReader();
+          reader.readAsDataURL(data);
+          reader.onload = () => {
+          const galleryElt = document.getElementById("imageFiltre");
+          if (galleryElt !== null) {
+            const imgElt = document.createElement("img");
+            imgElt.setAttribute("id","filtre");
+            galleryElt.appendChild(imgElt);
+            if (imgElt !== null && reader.result as string) {
+              imgElt.setAttribute("src", (reader.result as string)); 
+            }
+          }
+        };
+        });
+      }
+    }
+
 
     var divHide = document.getElementById("imageFiltré")?.style.visibility;
       if (divHide == 'hidden') {
@@ -165,6 +220,23 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
       }
   }
 
+
+  function handleSelect(event) {
+    selectValue = (event.target.value);
+    if(selectValue == "Gaussien"){
+      const divVisible = document.getElementById("reponse")?.style.visibility;;
+        if (divVisible == 'visible') {
+          document.getElementById("reponse").style.visibility = 'hidden';
+        }
+    }
+    if(selectValue == "Moyen"){
+      const divVisible = document.getElementById("reponse")?.style.visibility;;
+        if (divVisible == 'hidden') {
+          document.getElementById("reponse").style.visibility = 'visible';
+        }
+    }
+
+}
 </script>
 
 <template>
@@ -219,15 +291,18 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
 
       <div id = "blur">
         <h3 id="titleBlur">Filtre flou</h3>
-        <select>
+        <select id="selectBlur" @change="handleSelect($event)">
+          <option></option>
           <option id="moyen">Moyen</option>
           <option id="gaussien">Gaussien</option>
         </select>
         <br>
-        <label for="blurLevel">Niveau de Flou : </label> 
-        <input type="number" id="blurLevel">
+        <div id="reponse" style="visibility: visible;">
+          <label for="blurLevel">Niveau de Flou : </label> 
+          <input  type="number" id="blurLevel">
+        </div> 
         &nbsp;
-        <button id="blurButton">appliquer</button>
+        <button id="blurButton" @click="submitFilter($event)">appliquer</button>
       </div>
 
       <div id="contour">

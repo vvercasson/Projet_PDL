@@ -27,7 +27,7 @@ function showImage(event)  {
 
 <template>
   <div>
-    <h3>Choose an image</h3>
+    <h3>Choisissez une image</h3>
     <div>
       <select v-model="selectedId" @change="showImage($event)">
         <option v-for="image in imageList" :value="image.id" :key="image.id">{{ image.name }}</option>

@@ -32,12 +32,12 @@ function handleFileUpload(event: Event) {
 
 <template>
   <div>
-    <h3>Upload an image</h3>
+    <h3>Upload une image</h3>
     <div id ="divUpload">
       <input type="file" id="file" ref="file" @change="handleFileUpload" />
     </div>
     <div>
-      <button @click="submitFile">Submit</button>
+      <button @click="submitFile">Valider</button>
     </div>
   </div>
 </template>

@@ -10,7 +10,7 @@
           <router-link to="/">Home</router-link>
           </li>
         <li>
-          <router-link to="/gallery">Gallery</router-link>
+          <router-link to="/gallery">Galerie</router-link>
         </li>
         <li>
           <router-link to="/upload">Upload</router-link>

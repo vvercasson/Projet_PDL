@@ -58,7 +58,8 @@ api.getImageList()
 </script>
 
 <template>
-  <h3>Gallery</h3>
+  <h3>Galerie</h3>
+  <p>Selectionnez une image pour y accéder</p>
   <div id="gallery">
     <div id = "carousselImg">
       <img :id="image.name" :key="image.id" v-for="image in imageList" :src="showImageGalery(image)" @click="clickImg(image.id)">
