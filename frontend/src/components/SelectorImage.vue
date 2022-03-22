@@ -168,89 +168,96 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
 </script>
 
 <template>
-<div id="imagedeBase">
-  <figure id="image"></figure>
-  <div id="description">
-    <div v-for="image in imageList" :key="image.id" >{{showDescription(image)}}</div>
-  </div>
-  <br>
-  <div id="Boutons">
-    <div id = "supprimer">
-      <button id="btDelete" @click="supprImg">supprimer</button>
+<div>
+  <div id="images">
+    <div id="imagedeBase">
+      <figure id="image"></figure>
+      <div id="description">
+        <div v-for="image in imageList" :key="image.id" >{{showDescription(image)}}</div>
+      </div>
+      <br>
+      <div id="Boutons">
+        <div id = "supprimer">
+          <button id="btDelete" @click="supprImg">supprimer</button>
+        </div>
+        <div id = "telecharger">
+          <button id="btSave" @click="saveImg">enregister</button>
+        </div>
+      </div>
     </div>
-    <div id = "telecharger">
-      <button id="btSave" @click="saveImg">enregister</button>
+
+  <div id="imageFiltré" style="visibility: hidden;">
+    <figure id="imageFiltre"></figure>
+    <div id="BoutonsFiltre">
+      <div id = "telechargerFiltre">
+        <button id="btSaveFiltre" @click="saveImg($event)">enregister</button>
+      </div>
     </div>
   </div>
 </div>
 
-<div id="imageFiltré" style="visibility: hidden;">
-  <figure id="imageFiltre"></figure>
-  <div id="BoutonsFiltre">
-    <div id = "supprimerFiltre">
-      <button id="btDeleteFiltre" @click="supprImg">supprimer</button>
+    <div id="Filtres">
+      <div id = "luminosite">
+        <h3 id="light">Luminosité</h3>
+        <input type="text" id="textLight" ref="text" placeholder="intensité">
+        <br>
+        <button id="submitLight" @click="submitFilter($event)">appliquer</button>
+      </div>
+
+      <div id = "histogramme">
+        <h3 id="titleHisto">Histogramme</h3>
+        <button id="histButton">appliquer</button>
+      </div>
+      
+      <div id = "couleur">
+        <h3 id="titleColor">Filtre couleur</h3>
+        <label for="inputColor">Couleur : </label> 
+        <input type="color" id="inputColor" name="couleur">
+        &nbsp;
+        <button id="colorButton">appliquer</button>
+      </div>
+
+      <div id = "blur">
+        <h3 id="titleBlur">Filtre flou</h3>
+        <select>
+          <option id="moyen">Moyen</option>
+          <option id="gaussien">Gaussien</option>
+        </select>
+        <br>
+        <label for="blurLevel">Niveau de Flou : </label> 
+        <input type="number" id="blurLevel">
+        &nbsp;
+        <button id="blurButton">appliquer</button>
+      </div>
+
+      <div id="contour">
+        <h3 id="titleContour"> Filtre Contour</h3>
+        <button id="submitContour" @click="submitFilter($event)">Filtre contour</button>
+      </div>
     </div>
-    <div id = "telechargerFiltre">
-      <button id="btSaveFiltre" @click="saveImg($event)">enregister</button>
-    </div>
-  </div>
 </div>
-
-  <div id="Filtres">
-    <div id = "luminosite">
-      <h3 id="light">Luminosité</h3>
-      <input type="text" id="textLight" ref="text" placeholder="intensité">
-      <br>
-      <button id="submitLight" @click="submitFilter($event)">appliquer</button>
-    </div>
-
-    <div id = "histogramme">
-      <h3 id="titleHisto">Histogramme</h3>
-      <button id="histButton">appliquer</button>
-    </div>
-    
-    <div id = "couleur">
-      <h3 id="titleColor">Filtre couleur</h3>
-      <label for="inputColor">Couleur : </label> 
-      <input type="color" id="inputColor" name="couleur">
-      &nbsp;
-      <button id="colorButton">appliquer</button>
-    </div>
-
-    <div id = "blur">
-      <h3 id="titleBlur">Filtre flou</h3>
-      <select>
-        <option id="moyen">Moyen</option>
-        <option id="gaussien">Gaussien</option>
-      </select>
-      <br>
-      <label for="blurLevel">Niveau de Flou : </label> 
-      <input type="number" id="blurLevel">
-      &nbsp;
-      <button id="blurButton">appliquer</button>
-    </div>
-
-    <div id="contour">
-      <h3 id="titleContour"> Filtre Contour</h3>
-      <button id="submitContour" @click="submitFilter($event)">Filtre contour</button>
-    </div>
-  </div>
 </template>
 
 <style>
-  img {
-    width: 300px; 
-    height: 300px; 
-  }
-  #Filtres {
+
+  #images {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    grid-template-rows: repeat(5, 1fr);
-    grid-column-gap: 0px;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: 1fr;
+    grid-column-gap: 10px;
     grid-row-gap: 0px;
   }
 
-  #luminosite {
+  #imagedeBase {
     grid-area: 1 / 1 / 2 / 2;
+  }
+
+  #imageFiltré{
+    grid-area: 1 / 2 / 2 / 3;;
+  }
+
+  img {
+    width: 300px; 
+    height: 300px; 
   }
 </style>

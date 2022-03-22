@@ -59,7 +59,7 @@ api.getImageList()
 
 <template>
   <h3>Gallery</h3>
-  <div>
+  <div id="gallery">
     <div id = "carousselImg">
       <img :id="image.name" :key="image.id" v-for="image in imageList" :src="showImageGalery(image)" @click="clickImg(image.id)">
     </div>
@@ -70,13 +70,21 @@ api.getImageList()
   img{
     width: 300px;
     height: 300px;
+    margin-top: 10px;
+    margin-left: 10px;
   }
-  #carousselImg{
-    display: flex;
+  #gallery{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr) 8fr repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr) 8fr repeat(2, 1fr);
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
   } 
 
-  #carousselImg div{
-    margin: auto;
+  #carousselImg{
+    grid-area: 1 / 3 / 4 / 4;
+    border: 5px solid #851680;
+    border-radius: 32px 32px 32px 32px;
   }
 
 </style>

@@ -18,13 +18,26 @@
       </ul>
     </nav>
     <div>
-      <h1>PDL - L3</h1>
+      <h1 id="titre">PDL - L3</h1>
       <router-view />
     </div>
   </div>
 </template>
 
 <style>
+#titre{
+	font-family: Georgia, serif;
+	font-size: 35px;
+	letter-spacing: 2px;
+	word-spacing: 2px;
+	color: #851680;
+	font-weight: 400;
+	text-decoration: none;
+	font-style: normal;
+	font-variant: normal;
+	text-transform: none;
+}
+
 #app {
   text-align: center;
   font-family: Arial, Helvetica, sans-serif;
