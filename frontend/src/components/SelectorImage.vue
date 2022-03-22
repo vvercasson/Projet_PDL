@@ -279,7 +279,7 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
       <div id = "blur">
         <h3 id="titleBlur">Filtre flou</h3>
         <select id="selectBlur" @change="handleSelect($event)">
-          <option></option>
+          <option>Choisir un filtre</option>
           <option id="moyen">Moyen</option>
           <option id="gaussien">Gaussien</option>
         </select>
