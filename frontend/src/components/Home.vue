@@ -37,4 +37,7 @@ function showImage(event)  {
 </template>
 
 <style>
+#icon {
+	width: 5%;
+}
 </style>

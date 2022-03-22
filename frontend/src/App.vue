@@ -18,13 +18,14 @@
       </ul>
     </nav>
     <div>
-      <h1 id="titre">PDL - L3</h1>
+      <h1 id="titre">PDL - Groupe M1A</h1>
       <router-view />
     </div>
   </div>
 </template>
 
 <style>
+
 #titre{
 	font-family: Georgia, serif;
 	font-size: 35px;

@@ -276,19 +276,6 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
         <button id="submitLight" @click="submitFilter($event)">appliquer</button>
       </div>
 
-      <div id = "histogramme">
-        <h3 id="titleHisto">Histogramme</h3>
-        <button id="histButton">appliquer</button>
-      </div>
-      
-      <div id = "couleur">
-        <h3 id="titleColor">Filtre couleur</h3>
-        <label for="inputColor">Couleur : </label> 
-        <input type="color" id="inputColor" name="couleur">
-        &nbsp;
-        <button id="colorButton">appliquer</button>
-      </div>
-
       <div id = "blur">
         <h3 id="titleBlur">Filtre flou</h3>
         <select id="selectBlur" @change="handleSelect($event)">
@@ -308,6 +295,19 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
       <div id="contour">
         <h3 id="titleContour"> Filtre Contour</h3>
         <button id="submitContour" @click="submitFilter($event)">Filtre contour</button>
+      </div>
+
+      <div id = "histogramme" style="visibility: hidden;">
+        <h3 id="titleHisto">Histogramme</h3>
+        <button id="histButton">appliquer</button>
+      </div>
+      
+      <div id = "couleur" style="visibility: hidden;">
+        <h3 id="titleColor">Filtre couleur</h3>
+        <label for="inputColor">Couleur : </label> 
+        <input type="color" id="inputColor" name="couleur">
+        &nbsp;
+        <button id="colorButton">appliquer</button>
       </div>
     </div>
 </div>
