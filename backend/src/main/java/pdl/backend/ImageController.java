@@ -66,6 +66,7 @@ public class ImageController {
 
     if (image.isPresent()) {
       InputStream inputStream = new ByteArrayInputStream(image.get().getData());
+      boolean isPng = image.get().getName().endsWith("png");
 
       // No algorithm applied if param is empty -> simply return original image
       if(algorithm.isEmpty()) {
@@ -78,6 +79,7 @@ public class ImageController {
           BufferedImage input;
           input = ImageIO.read(inputStream);
           Planar<GrayU8> imagein = ConvertBufferedImage.convertFromPlanar(input, null, true, GrayU8.class);
+          System.out.println("Num bands : " + imagein.getNumBands());
           Planar<GrayU8> imageout = imagein.createSameShape();
 
           if(first.isEmpty()) {
@@ -92,12 +94,18 @@ public class ImageController {
               ByteArrayOutputStream os = new ByteArrayOutputStream();
               BufferedImage output = ConvertBufferedImage.convertTo(end, null);
 
-              if(!ImageIO.write(output, "png", os)) {
-                System.err.println("** No writter found **");
-              }                          
-              InputStream is = new ByteArrayInputStream(os.toByteArray());
+              if(isPng) {
+                ImageIO.write(output, "png", os);
+              }
+              else {
+                ImageIO.write(output, "jpg", os);
+              }
 
-              return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(new InputStreamResource(is));
+              InputStream is = new ByteArrayInputStream(os.toByteArray());
+              
+              if(isPng)
+                return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(new InputStreamResource(is));
+              return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(new InputStreamResource(is));
             }
             else {
               System.err.println("Unknown algorithm : " + algorithm.get() );
@@ -105,20 +113,44 @@ public class ImageController {
             }
           }
           else {
-            // Seuls algo possibles : Luminosité / Flou
-
-            // Recuperation parametre first
-            int delta = Integer.parseInt(first.get());
-            if(algorithm.get().equals("luminosite")) {
+            if(second.isEmpty()) {
+              System.out.println("here 0");
+              // Seuls algo possibles : Luminosité
+              // Recuperation parametre first
+              if(algorithm.get().equals("luminosite")) {
+                int delta = Integer.parseInt(first.get());
                 ColorLevelProcessing.lightColor2(imagein,imageout, delta);          
+              }
+              else if(algorithm.get().equals("flou")) {
+                String type = first.get();
+                if(type.equals("gaussien")) {
+                  int[][] kernel = {
+                      {1,2,3,2,1},
+                      {2,6,8,6,2},
+                      {3,8,10,8,3},
+                      {2,6,8,6,2},
+                      {1,2,3,2,1}
+                    };
+                  ColorLevelProcessing.convolutionColor(imagein, imageout, kernel);
+                }
+              }
+              else {
+                System.err.println("Unknown algorithm : " + algorithm.get() );
+                return new ResponseEntity<>("Algorithm : " + algorithm.get() + " not found. 400 Bad Request", HttpStatus.BAD_REQUEST);
+              }
             }
-            else if(algorithm.get().equals("flou")) {
-              ColorLevelProcessing.meanFilterColor(imagein, imageout, delta);
-            }
-            // Add algo
             else {
-              System.err.println("Unknown algorithm : " + algorithm.get() );
-              return new ResponseEntity<>("Algorithm : " + algorithm.get() + " not found. 400 Bad Request", HttpStatus.BAD_REQUEST);
+              if(algorithm.get().equals("flou")) {
+                String type = first.get();
+                int size = Integer.parseInt(second.get());
+                if(type.equals("moyen")) {
+                  ColorLevelProcessing.meanFilterColor(imagein, imageout, size);
+                }
+                else {
+                  System.err.println("Unknown algorithm : " + algorithm.get());
+                  return new ResponseEntity<>("Blur filter : " + type + " not found. 400 Bad Request", HttpStatus.BAD_REQUEST);
+                }
+              }
             }
           }
 
