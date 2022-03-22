@@ -5,10 +5,13 @@ import { api } from '@/http-api';
 import { ImageType } from '@/image';
 import axios from 'axios';
 import { report } from 'process';
+import { request } from 'http';
 
 const props = defineProps<{ id: number}>();
 
 const imageList = ref<ImageType[]>([]);
+
+const target = ref<Blob>();
 
 api.getImageList() // fonction qui récupère la liste des images
   .then((data) => {
@@ -68,33 +71,105 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
     }
   }
 
-  function saveImg(){
-    api.getImage(props.id) // utilisation de la fonction de récupération d'image
-    .then((data: Blob) =>{
-      var url = window.URL.createObjectURL(data); // on créer un url avec le Blob
-      var enregister = document.createElement('a'); // on créer la balise a en html
-      enregister.href = url;
-      var type = "";
-      switch(data.type){
-        case "image/jpeg" || "image/jpg":
-          type = "jpg";
-          break;
-        case "image/png":
-          type = "png";
-          break;
-      }
+  function saveImg(event){
+    var id;
+    console.log(event.target);
+    if(event.target.id == "btSave"){
+      api.getImage(props.id)
+      .then((data: Blob) =>{
+        var url = window.URL.createObjectURL(data);
+        var enregister = document.createElement('a');
+        enregister.href = url;
+        var type = "";
+        switch(data.type){
+          case "image/jpeg" || "image/jpg":
+            type = "jpg";
+            break;
+          case "image/png":
+            type = "png";
+            break;
+        }
 
-      enregister.setAttribute('download','image.'+type); // quand l'image est enregistrée elle est sous forme image.jpg ou png
+      enregister.setAttribute('download','image.'+type); 
       document.body.appendChild(enregister);
 
-      enregister.click(); // quand l'évenement de clique est effectué, l'enregistrement en local se fait
+      enregister.click(); 
     });
+    }
+    else{
+      var enregister = document.createElement('a');
+      var url = window.URL.createObjectURL(target.value);
+      enregister.href = url;
+      enregister.setAttribute('download','image.jpg'); 
+      document.body.appendChild(enregister);
+
+      enregister.click();
+    }
   }
+  function submitFilter(event){
+    const imageShow = document.getElementById("imageFiltre");
+    if (imageShow !== null) {
+      var varP = document.getElementById("filtre");
+    }
+    if(varP != null){
+      varP.parentNode?.removeChild(varP);
+    }
+    console.log(event.target.id); // faire le if pour chaque filtre
+    if(event.target.id == "submitLight"){
+      const algo = "luminosite";
+      const first = document.getElementById("textLight").value;
+      api.getImageFilterOneParameters(props.id,algo,first)
+    .then((data : Blob) => {
+      target.value = data;
+      const reader = new window.FileReader();
+      reader.readAsDataURL(data);
+      reader.onload = () => {
+        const galleryElt = document.getElementById("imageFiltre");
+        if (galleryElt !== null) {
+          const imgElt = document.createElement("img");
+          imgElt.setAttribute("id","filtre");
+          galleryElt.appendChild(imgElt);
+          if (imgElt !== null && reader.result as string) {
+            imgElt.setAttribute("src", (reader.result as string)); 
+          }
+        }
+      };
+    });
+    }
+
+    if(event.target.id == "submitContour"){
+      const algo = "contour";
+      api.getImageFilterOnlyAlgo(props.id,algo)
+      .then((data : Blob) => {
+        target.value = data;
+        const reader = new window.FileReader();
+        reader.readAsDataURL(data);
+        reader.onload = () => {
+        const galleryElt = document.getElementById("imageFiltre");
+        if (galleryElt !== null) {
+          const imgElt = document.createElement("img");
+          imgElt.setAttribute("id","filtre");
+          galleryElt.appendChild(imgElt);
+          if (imgElt !== null && reader.result as string) {
+            imgElt.setAttribute("src", (reader.result as string)); 
+          }
+        }
+      };
+      });
+    }
+
+
+    var divHide = document.getElementById("imageFiltré")?.style.visibility;
+      if (divHide == 'hidden') {
+        document.getElementById("imageFiltré").style.visibility = 'visible';
+      }
+  }
+
 </script>
 
 <template>
+<div id="imagedeBase">
   <figure id="image"></figure>
-
   <div id="description">
     <div v-for="image in imageList" :key="image.id" >{{showDescription(image)}}</div>
   </div>
@@ -107,11 +182,26 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
       <button id="btSave" @click="saveImg">enregister</button>
     </div>
   </div>
+</div>
+
+<div id="imageFiltré" style="visibility: hidden;">
+  <figure id="imageFiltre"></figure>
+  <div id="BoutonsFiltre">
+    <div id = "supprimerFiltre">
+      <button id="btDeleteFiltre" @click="supprImg">supprimer</button>
+    </div>
+    <div id = "telechargerFiltre">
+      <button id="btSaveFiltre" @click="saveImg($event)">enregister</button>
+    </div>
+  </div>
+</div>
+
   <div id="Filtres">
     <div id = "luminosite">
       <h3 id="light">Luminosité</h3>
-      <button id="increaseLight">-</button>
-      <button id="reduceLight">+</button>
+      <input type="text" id="textLight" ref="text" placeholder="intensité">
+      <br>
+      <button id="submitLight" @click="submitFilter($event)">appliquer</button>
     </div>
 
     <div id = "histogramme">
@@ -142,7 +232,7 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
 
     <div id="contour">
       <h3 id="titleContour"> Filtre Contour</h3>
-      <button id="light">Filtre contour</button>
+      <button id="submitContour" @click="submitFilter($event)">Filtre contour</button>
     </div>
   </div>
 </template>
