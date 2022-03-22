@@ -153,7 +153,6 @@ public class ImageController {
               }
             }
           }
-
           // Creating output
           ByteArrayOutputStream os = new ByteArrayOutputStream();
           BufferedImage output = new BufferedImage(imagein.width, imagein.height, input.getType());
@@ -168,7 +167,7 @@ public class ImageController {
         } catch (IOException e1) {
           e1.printStackTrace();
         }        
-    }
+      }
     }
     return new ResponseEntity<>("Image id=" + id + " not found. 404 error", HttpStatus.NOT_FOUND);
   }
