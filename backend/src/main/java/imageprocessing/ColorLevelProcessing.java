@@ -246,71 +246,57 @@ public class ColorLevelProcessing {
 		}
 	}
 
+	public static void luminosite(Planar<GrayU8> input, Planar<GrayU8> output, int delta){		
+		// Valeur de vérification lors de l'application du filtre
+		int min = 0;
+		int max = 255;
 
-    public static void main( String[] args ) {
+		// 1 bande = Image en noir et blanc sinon image en couleur
+		boolean isGrey = input.getNumBands() == 1? true:false;
 
-    	// load image
-		if (args.length < 2) {
-			System.out.println("missing input or output image filename");
-			System.exit(-1);
+		// 4 bande = PNG
+		boolean isPng = input.getNumBands() == 4? true:false;
+		
+
+		// Si l'image est grise, on ne traite qu'une bande sinon 3 (peu importe png ou jpg)
+		int bandsToTreat = isGrey? 1:3;
+
+		if(isPng)
+			copyAlphaBand(input, output);
+
+		// Parcours tous les pixels
+		for (int y = 0; y < input.height; ++y) {
+			for (int x = 0; x < input.width; ++x) { 
+
+				// Parcours chaque bande de l'image
+				for (int i = 0; i < bandsToTreat; i++){
+
+					// Calcul de la nouvelle valeur de pixel
+					int gl = input.getBand(i).get(x, y) + delta;
+
+					// Verif borne inf.
+					if (gl < min)
+						output.getBand(i).set(x, y, 0);
+
+					// Verif borne sup.
+					else if(gl > max)
+						output.getBand(i).set(x, y, 255);
+					// Cas dit "normal"
+					else
+						output.getBand(i).set(x,y,gl);
+				}
+			}
 		}
-		final String inputPath = args[0];
-		BufferedImage input = UtilImageIO.loadImage(inputPath);
-        Planar<GrayU8> imagein = ConvertBufferedImage.convertFromPlanar(input, null, true, GrayU8.class);
-		Planar<GrayU8> imageout = imagein.createSameShape();
-		if(imageout == null) {
-			System.err.println("Cannot read input file '" + inputPath);
-			System.exit(-1);
-		}
-		System.out.println("Input file : "+input);
-
-		// processing
-
-		int[][] kernel = {{1,2,3,2,1},
-                      {2,6,8,6,2},
-                      {3,8,10,8,3},
-                      {2,6,8,6,2},
-                      {1,2,3,2,1}
-                    };
-		
-        //threshold(image, 128);
-		//lightColor(imagein,50);
-		//imageDynamique(input);
-		//imageEgalizer(input);
-        //convertToGray(image);
-		//meanFilterColor(imagein, imageout,15);
-		//convolutionColor(imagein,imageout,kernel);
-		//GrayU8 imageGrey = convertToGray(imagein);
-
-		/////////////////
-		// RGB TO HSV
-		/////////////////
-	
-		float[] hsvFun = new float[3];
-		float[] hsvBoof = new float[3];
-
-		//rgbToHsv(122,122,122,hsvFun);
-		//System.out.println("Resultat de ma fonction : "+hsvFun[0]+' '+hsvFun[1]+' '+hsvFun[2]);
-		//ColorHsv.rgbToHsv(62,25,79,hsvBoof);
-		//System.out.println("Resultat de Boofcv : "+hsvBoof[0]+' '+hsvBoof[1]+' '+hsvBoof[2]);
-		
-		/////////////////
-		// HSV TO RGB
-		////////////////
-
-		int[] rgbMoi = new int[3];
-		double[] rgbFun = new double[3];
-
-		hsvToRgb(270,10,45,rgbMoi);
-		System.out.println("Resultat moi : "+rgbMoi[0]+' '+rgbMoi[1]+' '+rgbMoi[2]);
-		ColorHsv.hsvToRgb(270,10,45,rgbFun);
-		System.out.println("Resultat fonction : "+rgbFun[0]+' '+rgbFun[1]+' '+rgbFun[2]);
-		
-		//tintedImage(imagein,imageout,270);
-		// save output image
-		final String outputPath = args[1];
-		UtilImageIO.saveImage(imageout, outputPath);
-		System.out.println("Image saved in: " + outputPath);
 	}
+
+	public static void copyAlphaBand(Planar<GrayU8> input, Planar<GrayU8> output) {
+		System.out.println("Copying Alpha Band");
+		for (int y = 0; y < input.height; ++y) {
+			for (int x = 0; x < input.width; ++x) { 
+						output.getBand(3).set(x,y,input.getBand(3).get(x,y));
+				
+			}
+		}
+	} 
 
 }
