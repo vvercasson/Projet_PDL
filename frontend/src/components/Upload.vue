@@ -5,7 +5,16 @@ import { api } from '@/http-api';
 const target = ref<HTMLInputElement>();
 
 function submitFile() {
-  if (target.value !== null && target.value !== undefined && target.value.files !== null) {
+  const textUpload = document.getElementById("textUpload");
+  if(textUpload != null){
+    textUpload.parentNode?.removeChild(textUpload);
+  }
+
+  if (target.value?.files[0].type == "application/pdf"){
+    alert("Erreur de format, veuillez inserer une image png ou jpg");
+  }
+  else{
+    if (target.value !== null && target.value !== undefined && target.value.files !== null) {
     const file = target.value.files[0];
     if (file === undefined)
       return;
@@ -17,11 +26,15 @@ function submitFile() {
     }).catch(e => {
       console.log(e.message);
     });
-
+    
     var text = document.createElement("h4");
+    text.setAttribute("id","textUpload");
     text.textContent = "Image Upload !";
     var divUpload = document.getElementById("divUpload");
     divUpload?.appendChild(text);
+
+    
+    }
   }
 }
 

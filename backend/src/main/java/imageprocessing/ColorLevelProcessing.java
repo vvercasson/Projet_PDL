@@ -37,14 +37,12 @@ public class ColorLevelProcessing {
 			for (int x = 0; x < input.width; ++x) {
                 for (int i = 0; i < input.getNumBands(); i++){
                     int gl = input.getBand(i).get(x, y);
-					// System.out.println("Old value for band number " + i + " is " + gl);
                     if (gl+delta > min && gl+delta < max)
                         input.getBand(i).set(x, y, gl+delta);
                     else{
                         gl = 255;
                         input.getBand(i).set(x, y, gl);
                     }
-					// System.out.println("New value for band number " + i + " is " + input.getBand(i).get(x, y));
                 }
 			}
 		}
@@ -58,7 +56,6 @@ public class ColorLevelProcessing {
 			for (int i = 0; i < input.getNumBands(); i++){
 				if(i<3) {
 					int gl = input.getBand(i).get(x, y);
-				// System.out.println("Old value for band number " + i + " is " + gl);
 				if (gl+delta > min && gl+delta < max)
 					output.getBand(i).set(x, y, gl+delta);
 				else{
@@ -69,8 +66,6 @@ public class ColorLevelProcessing {
 				else {
 					output.getBand(i).set(x, y, input.getBand(i).get(x, y));
 				}
-				
-				// System.out.println("New value for band number " + i + " is " + input.getBand(i).get(x, y));
 			}
 		}
 	}
@@ -244,73 +239,6 @@ public class ColorLevelProcessing {
 				output.getBand(2).set(x, y,rgb[2]);
 			}
 		}
-	}
-
-
-    public static void main( String[] args ) {
-
-    	// load image
-		if (args.length < 2) {
-			System.out.println("missing input or output image filename");
-			System.exit(-1);
-		}
-		final String inputPath = args[0];
-		BufferedImage input = UtilImageIO.loadImage(inputPath);
-        Planar<GrayU8> imagein = ConvertBufferedImage.convertFromPlanar(input, null, true, GrayU8.class);
-		Planar<GrayU8> imageout = imagein.createSameShape();
-		if(imageout == null) {
-			System.err.println("Cannot read input file '" + inputPath);
-			System.exit(-1);
-		}
-		System.out.println("Input file : "+input);
-
-		// processing
-
-		int[][] kernel = {{1,2,3,2,1},
-                      {2,6,8,6,2},
-                      {3,8,10,8,3},
-                      {2,6,8,6,2},
-                      {1,2,3,2,1}
-                    };
-		
-        //threshold(image, 128);
-		//lightColor(imagein,50);
-		//imageDynamique(input);
-		//imageEgalizer(input);
-        //convertToGray(image);
-		//meanFilterColor(imagein, imageout,15);
-		//convolutionColor(imagein,imageout,kernel);
-		//GrayU8 imageGrey = convertToGray(imagein);
-
-		/////////////////
-		// RGB TO HSV
-		/////////////////
-	
-		float[] hsvFun = new float[3];
-		float[] hsvBoof = new float[3];
-
-		//rgbToHsv(122,122,122,hsvFun);
-		//System.out.println("Resultat de ma fonction : "+hsvFun[0]+' '+hsvFun[1]+' '+hsvFun[2]);
-		//ColorHsv.rgbToHsv(62,25,79,hsvBoof);
-		//System.out.println("Resultat de Boofcv : "+hsvBoof[0]+' '+hsvBoof[1]+' '+hsvBoof[2]);
-		
-		/////////////////
-		// HSV TO RGB
-		////////////////
-
-		int[] rgbMoi = new int[3];
-		double[] rgbFun = new double[3];
-
-		hsvToRgb(270,10,45,rgbMoi);
-		System.out.println("Resultat moi : "+rgbMoi[0]+' '+rgbMoi[1]+' '+rgbMoi[2]);
-		ColorHsv.hsvToRgb(270,10,45,rgbFun);
-		System.out.println("Resultat fonction : "+rgbFun[0]+' '+rgbFun[1]+' '+rgbFun[2]);
-		
-		//tintedImage(imagein,imageout,270);
-		// save output image
-		final String outputPath = args[1];
-		UtilImageIO.saveImage(imageout, outputPath);
-		System.out.println("Image saved in: " + outputPath);
 	}
 
 }
