@@ -66,7 +66,76 @@ public class TraitementImage {
 		}
 	}
 
+	public static void negatif(Planar<GrayU8> input, Planar<GrayU8> output){		
+		// 1 bande = Image en noir et blanc sinon image en couleur
+		boolean isGrey = isGrey(input);
+
+		// 4 bande = PNG
+		boolean isPng = isPng(input);
+		
+
+		// Si l'image est grise, on ne traite qu'une bande sinon 3 (peu importe png ou jpg)
+		int bandsToTreat = isGrey? 1:3;
+
+		if(isPng)
+			copyAlphaBand(input, output);
+
+		int rgb[] = new int[3];
+		// Parcours tous les pixels
+		for (int y = 0; y < input.height; ++y) {
+			for (int x = 0; x < input.width; ++x) { 
+
+				// Parcours chaque bande de l'image
+				for (int i = 0; i < bandsToTreat; i++){
+					rgb[i] = input.getBand(i).get(x, y);
+					output.getBand(i).set(x, y, 255 - rgb[i]);
+				}
+			}
+		}
+	}
+
 	public static void flouMoyen(Planar<GrayU8> input, Planar<GrayU8> output, int size){
+		if(size%2 == 0) {size -= 1;}
+
+		int taille = (int) Math.floor(size/2);
+
+		int div = size*size;
+
+		// 1 bande = Image en noir et blanc sinon image en couleur
+		boolean isGrey = isGrey(input);
+
+		// 4 bande = PNG
+		boolean isPng = isPng(input);
+
+		if(isPng)
+			copyAlphaBand(input, output);
+				
+		
+		// Si l'image est grise, on ne traite qu'une bande sinon 3 (peu importe png ou jpg)
+		int bandsToTreat = isGrey? 1:3;
+
+		// Parcours pixels
+		for(int y=taille;y<input.height-taille;y++){
+			for (int x=taille;x<input.width-taille;x++) {
+
+				for (int i = 0; i < bandsToTreat; i++){
+					int r = 0;
+					int somme = 0;
+					for(int v = -taille; v <= taille; v++){
+						for (int u = -taille; u <= taille; u++) {
+							r += input.getBand(i).get(Math.abs(x + v), Math.abs(y + u));
+						}        
+					}
+
+					somme = r/div;
+
+					output.getBand(i).set(x,y,somme);
+				}
+			}
+		}
+	}
+
+	public static void filtreMedian(Planar<GrayU8> input, Planar<GrayU8> output, int size){
 		if(size%2 == 0) {size -= 1;}
 
 		int taille = (int) Math.floor(size/2);
@@ -141,6 +210,45 @@ public class TraitementImage {
 					}
 					somme = r/div;
 					output.getBand(i).set(x, y, somme);
+				}
+			}
+		}
+	}
+
+	// Retourne l'image verticalement(v) hozitalement(h) ou les deux(b) selon le paramètre sens passé
+	public static void retourner(Planar<GrayU8> input, Planar<GrayU8> output,char sens) {
+		if( !(sens == 'h' || sens == 'v' || sens == 'b')  ) {
+			System.err.println("Sens has to be either l v or b");
+			return;
+		}
+		// 1 bande = Image en noir et blanc sinon image en couleur
+		boolean isGrey = isGrey(input);
+
+		// 4 bande = PNG
+		boolean isPng = isPng(input);
+						
+		// Si l'image est grise, on ne traite qu'une bande sinon 3 (peu importe png ou jpg)
+		int bandsToTreat = isGrey? 1:3;
+				
+		if(isPng)
+			copyAlphaBand(input, output);
+
+		int rgb[] = new int[3];
+		int height = input.getHeight() - 1;
+		int width = input.getWidth() - 1;
+
+		// Parcours tous les pixels
+		for (int y = 0; y < input.height; ++y) {
+			for (int x = 0; x < input.width; ++x) { 
+				// Parcours chaque bande de l'image
+				for (int i = 0; i < bandsToTreat; i++){
+					rgb[i] = input.getBand(i).get(x, y);
+					if(sens == 'v')
+						output.getBand(i).set(x, height-y, rgb[i]);
+					else if(sens == 'h')
+						output.getBand(i).set(width-x, y, rgb[i]);
+					else if(sens == 'b') 
+						output.getBand(i).set(width-x, height-y, rgb[i]);
 				}
 			}
 		}

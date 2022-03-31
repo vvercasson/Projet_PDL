@@ -65,10 +65,11 @@ public class ImageController {
     Optional<Image> image = imageDao.retrieve(id);
 
 
+    // Check if image with id exists
     if (image.isPresent()) {
       InputStream inputStream = new ByteArrayInputStream(image.get().getData());
 
-      // No algorithm applied if param is empty -> simply return original image
+      // No algorithm applied if param "algorithm" is empty -> simply return original image
       if(algorithm.isEmpty()) {
         System.out.println("No algorithm applied");
         return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(new InputStreamResource(inputStream));
@@ -76,10 +77,14 @@ public class ImageController {
       // There's an algorithm
       else {
         try {
+          // Convert the incoming stream into a Planar
           BufferedImage input;
           input = ImageIO.read(inputStream);
           Planar<GrayU8> imagein = ConvertBufferedImage.convertFromPlanar(input, null, true, GrayU8.class);
-          System.out.println("Num bands : " + imagein.getNumBands());
+          
+          // Debug line
+          // System.out.println("[Num bands : " + imagein.getNumBands() + "]");
+
           boolean isPng = TraitementImage.isPng(imagein);
           Planar<GrayU8> imageout = imagein.createSameShape();
 
@@ -88,10 +93,10 @@ public class ImageController {
             if(algorithm.get().equals("contour")) {
               GrayU8 transit = new GrayU8(imagein.width, imagein.height);
 
-              // ColorLevelProcessing.convertToGray2(imagein,transit);
+
               TraitementImage.rgbToGrey(imagein, transit);
               GrayU8 end = new GrayU8(imagein.width, imagein.height);
-              // Convolution.gradientImageSobel(transit, end);
+
               TraitementImage.contour(transit, end);
 
               ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -110,6 +115,9 @@ public class ImageController {
                 return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(new InputStreamResource(is));
               return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(new InputStreamResource(is));
             }
+            else if(algorithm.get().equals("negatif")) {
+              TraitementImage.negatif(imagein, imageout);
+            }
             else {
               System.err.println("Unknown algorithm : " + algorithm.get() );
               return new ResponseEntity<>("Algorithm : " + algorithm.get() + " not found. 400 Bad Request", HttpStatus.BAD_REQUEST); 
@@ -121,7 +129,12 @@ public class ImageController {
               // Recuperation parametre first
               if(algorithm.get().equals("luminosite")) {
                 int delta = Integer.parseInt(first.get());    
-                TraitementImage.luminosite(imagein,imageout, delta);
+                // TraitementImage.luminosite(imagein,imageout, delta);
+                TraitementImage.luminosite(imagein, imageout,delta);
+              }
+              else if(algorithm.get().equals("rotate")) {
+                char sens = first.get().charAt(0);
+                TraitementImage.retourner(imagein, imageout, sens);
               }
               else if(algorithm.get().equals("flou")) {
                 String type = first.get();
@@ -133,7 +146,6 @@ public class ImageController {
                       {2,6,8,6,2},
                       {1,2,3,2,1}
                     };
-                  // ColorLevelProcessing.convolutionColor(imagein, imageout, kernel);
                   TraitementImage.gaussien(imagein, imageout, kernel);
                 }
               }
@@ -147,7 +159,6 @@ public class ImageController {
                 String type = first.get();
                 int size = Integer.parseInt(second.get());
                 if(type.equals("moyen")) {
-                  // ColorLevelProcessing.meanFilterColor(imagein, imageout, size);
                   TraitementImage.flouMoyen(imagein, imageout, size);
                 }
                 else {
@@ -161,7 +172,6 @@ public class ImageController {
           ByteArrayOutputStream os = new ByteArrayOutputStream();
           BufferedImage output = new BufferedImage(imagein.width, imagein.height, input.getType());
           ConvertBufferedImage.convertTo(imageout,output,true);
-          // BufferedImage outBuffered = ConvertBufferedImage.convertTo_U8(imageout, null, false);
           if(isPng) {
             ImageIO.write(output, "png", os);
           }
@@ -237,26 +247,5 @@ public class ImageController {
     }
     return nodes;
   }
-
- /* @RequestMapping(value = "/images/{id}")
-  @ResponseBody
-  public String executeAlgorithm(@PathVariable("id") long id,@RequestParam("algorithm") String algo,@RequestParam String p1,@RequestParam("p2") Optional<String> p2){
-    Optional<Image> image = imageDao.retrieve(id);
-    if (image.isPresent()) {
-      String inputPath = "./src/main/resources/images/"+image.get().getName();
-      BufferedImage input = UtilImageIO.loadImage(inputPath);
-      Planar<GrayU8> imagein = ConvertBufferedImage.convertFromPlanar(input, null, true, GrayU8.class);
-      //return "lightColor executed";
-      if (algo == "lightColor"){
-        ColorLevelProcessing.lightColor(imagein,Integer.parseUnsignedInt(p1));
-        String outputPath = "./result.jpg";
-        UtilImageIO.saveImage(imagein, outputPath);
-		    System.out.println("Image saved in: " + outputPath);
-      }
-
-    }
-    return "error";
-  }*/
-  
 
 }
