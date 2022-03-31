@@ -37,14 +37,12 @@ public class ColorLevelProcessing {
 			for (int x = 0; x < input.width; ++x) {
                 for (int i = 0; i < input.getNumBands(); i++){
                     int gl = input.getBand(i).get(x, y);
-					// System.out.println("Old value for band number " + i + " is " + gl);
                     if (gl+delta > min && gl+delta < max)
                         input.getBand(i).set(x, y, gl+delta);
                     else{
                         gl = 255;
                         input.getBand(i).set(x, y, gl);
                     }
-					// System.out.println("New value for band number " + i + " is " + input.getBand(i).get(x, y));
                 }
 			}
 		}
@@ -58,7 +56,6 @@ public class ColorLevelProcessing {
 			for (int i = 0; i < input.getNumBands(); i++){
 				if(i<3) {
 					int gl = input.getBand(i).get(x, y);
-				// System.out.println("Old value for band number " + i + " is " + gl);
 				if (gl+delta > min && gl+delta < max)
 					output.getBand(i).set(x, y, gl+delta);
 				else{
@@ -69,8 +66,6 @@ public class ColorLevelProcessing {
 				else {
 					output.getBand(i).set(x, y, input.getBand(i).get(x, y));
 				}
-				
-				// System.out.println("New value for band number " + i + " is " + input.getBand(i).get(x, y));
 			}
 		}
 	}

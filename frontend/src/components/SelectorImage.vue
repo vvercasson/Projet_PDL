@@ -121,13 +121,13 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
     console.log(event.target.id); // faire le if pour chaque filtre
     if(event.target.id == "submitLight"){
       const algo = "luminosite";
-      const first = document.getElementById("textLight").value;
-      if (first == 0){
-        alert("veuillez rentrer une valeur avant de valider !");
+      const first = document.getElementById("textLight");
+      if (first.value <= 0 || isNaN(first.value)){
+        alert("veuillez rentrer une valeur supérieur à 0 !");
       }
 
       else{
-        api.getImageFilterOneParameters(props.id,algo,first)
+        api.getImageFilterOneParameters(props.id,algo,first.value)
         .then((data : Blob) => {
           target.value = data;
           const reader = new window.FileReader();
@@ -172,24 +172,30 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
       const algo = "flou";
       if (selectValue == "Moyen"){
         const first = "moyen";
-        const size = document.getElementById("blurLevel").value;
-        api.getImageFilterAllParameters(props.id,algo,first,size)
-        .then((data : Blob) => {
-          target.value = data;
-          const reader = new window.FileReader();
-          reader.readAsDataURL(data);
-          reader.onload = () => {
-          const galleryElt = document.getElementById("imageFiltre");
-          if (galleryElt !== null) {
-            const imgElt = document.createElement("img");
-            imgElt.setAttribute("id","filtre");
-            galleryElt.appendChild(imgElt);
-            if (imgElt !== null && reader.result as string) {
-              imgElt.setAttribute("src", (reader.result as string)); 
+        const size = document.getElementById("blurLevel").value; 
+        if (size <= 0){
+          alert("veuillez rentrer une valeur supérieur à 0 !");
+        }
+        else{
+          api.getImageFilterAllParameters(props.id,algo,first,size)
+          .then((data : Blob) => {
+            target.value = data;
+            const reader = new window.FileReader();
+            reader.readAsDataURL(data);
+            reader.onload = () => {
+            const galleryElt = document.getElementById("imageFiltre");
+            if (galleryElt !== null) {
+              const imgElt = document.createElement("img");
+              imgElt.setAttribute("id","filtre");
+              galleryElt.appendChild(imgElt);
+              if (imgElt !== null && reader.result as string) {
+                imgElt.setAttribute("src", (reader.result as string)); 
+              }
             }
-          }
-        };
-        });
+            
+          };
+          }); 
+        }
       }
       if(selectValue == "Gaussien"){
         const first = "gaussien";
@@ -213,35 +219,83 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
       }
     }
 
-
-    var divHide = document.getElementById("imageFiltré")?.style.visibility;
+    var divHide = document.getElementById("btSaveFiltre")?.style.visibility;
       if (divHide == 'hidden') {
-        document.getElementById("imageFiltré").style.visibility = 'visible';
+        document.getElementById("btSaveFiltre").style.visibility = 'visible';
       }
   }
 
 
   function handleSelect(event) {
     selectValue = (event.target.value);
-    if(selectValue == "Gaussien"){
-      const divVisible = document.getElementById("reponse")?.style.visibility;;
-        if (divVisible == 'visible') {
-          document.getElementById("reponse").style.visibility = 'hidden';
-        }
-    }
+
     if(selectValue == "Moyen"){
       const divVisible = document.getElementById("reponse")?.style.visibility;;
         if (divVisible == 'hidden') {
           document.getElementById("reponse").style.visibility = 'visible';
         }
     }
+    else{
+      const divVisible = document.getElementById("reponse")?.style.visibility;;
+        if (divVisible == 'visible') {
+          document.getElementById("reponse").style.visibility = 'hidden';
+        }
+    }
 
-}
+  }
+
+  function showFilters(event){
+    document.getElementById("luminosite").style.visibility = 'hidden';
+    document.getElementById("blur").style.visibility = 'hidden';
+    document.getElementById("contour").style.visibility = 'hidden';
+    document.getElementById("extension").style.visibility = 'hidden';
+
+
+    var menu = event.target.id;
+    if (menu == "menuLumi"){
+      var divHide = document.getElementById("luminosite")?.style.visibility;
+      if (divHide == 'hidden') {
+        document.getElementById("luminosite").style.visibility = 'visible';
+      }
+    }
+    if (menu == "menuBlur"){
+      var divHide = document.getElementById("blur")?.style.visibility;
+      if (divHide == 'hidden') {
+        document.getElementById("blur").style.visibility = 'visible';
+      }
+    }
+    if (menu == "menuContour"){
+      var divHide = document.getElementById("contour")?.style.visibility;
+      if (divHide == 'hidden') {
+        document.getElementById("contour").style.visibility = 'visible';
+      }
+    }
+    if (menu == "menuExtensions"){
+      var divHide = document.getElementById("extension")?.style.visibility;
+      if (divHide == 'hidden') {
+        document.getElementById("extension").style.visibility = 'visible';
+      }
+    }
+  }
+
 </script>
 
 <template>
-<div>
-  <div id="images">
+
+  <div id="menuDemo">
+    <div id="cssmenu">
+      <ul>
+          <li><a id="menuLumi" @click="showFilters($event)">Luminosité</a></li>
+          <li><a id="menuBlur" @click="showFilters($event)">Filtre Flou</a></li>
+          <li><a id="menuContour" @click="showFilters($event)">Contour</a></li>
+          <li><a id="menuExtensions" @click="showFilters($event)">Extensions</a></li>
+      </ul>
+    </div>
+  </div>
+
+<br>
+
+<div class="parent">
     <div id="imagedeBase">
       <figure id="image"></figure>
       <div id="description">
@@ -256,27 +310,26 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
           <button id="btSave" @click="saveImg">enregister</button>
         </div>
       </div>
+      <br>
     </div>
-
-  <div id="imageFiltré" style="visibility: hidden;">
-    <figure id="imageFiltre"></figure>
-    <div id="BoutonsFiltre">
-      <div id = "telechargerFiltre">
-        <button id="btSaveFiltre" @click="saveImg($event)">enregister</button>
+    <div id="imageFiltré">
+      <figure id="imageFiltre"></figure>
+      <div id="BoutonsFiltre">
+        <div id = "telechargerFiltre">
+          <button id="btSaveFiltre" @click="saveImg($event)" style="visibility: hidden;">enregister</button>
+        </div>
       </div>
     </div>
-  </div>
 </div>
-
-    <div id="Filtres">
-      <div id = "luminosite">
+  <div id="Filtres">
+      <div id = "luminosite" style="visibility: hidden;">
         <h3 id="light">Luminosité</h3>
         <input type="text" id="textLight" ref="text" placeholder="intensité">
         <br>
         <button id="submitLight" @click="submitFilter($event)">appliquer</button>
       </div>
 
-      <div id = "blur">
+      <div id = "blur" style="visibility: hidden;">
         <h3 id="titleBlur">Filtre flou</h3>
         <select id="selectBlur" @change="handleSelect($event)">
           <option>Choisir un filtre</option>
@@ -284,17 +337,29 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
           <option id="gaussien">Gaussien</option>
         </select>
         <br>
-        <div id="reponse" style="visibility: visible;">
+        <div id="reponse" style="visibility: hidden;">
           <label for="blurLevel">Niveau de Flou : </label> 
-          <input  type="number" id="blurLevel">
+          <input  type="number" min = "0" max="255" id="blurLevel">
         </div> 
         &nbsp;
         <button id="blurButton" @click="submitFilter($event)">appliquer</button>
       </div>
 
-      <div id="contour">
+      <div id="contour" style="visibility: hidden;">
         <h3 id="titleContour"> Filtre Contour</h3>
         <button id="submitContour" @click="submitFilter($event)">Filtre contour</button>
+      </div>
+
+      <div id = "extension" style="visibility: hidden;">
+        <h3 id="titleExtension">Extensions</h3>
+        <select id="selectExtension" @change="handleSelect($event)">
+          <option>Choisir un filtre</option>
+        </select>
+        <br>
+        <div id="reponseExtension" style="visibility: hidden;">
+        </div> 
+        &nbsp;
+        <button id="blurButton" @click="submitFilter($event)">appliquer</button>
       </div>
 
       <div id = "histogramme" style="visibility: hidden;">
@@ -309,11 +374,19 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
         &nbsp;
         <button id="colorButton">appliquer</button>
       </div>
-    </div>
-</div>
+  </div>
 </template>
 
 <style>
+
+  .parent{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: 1fr;
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+    grid-column-gap: 16px;
+  }
 
   #images {
     display: grid;
@@ -324,15 +397,104 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
   }
 
   #imagedeBase {
+    border-style: solid;
+    border-color: #851680;
     grid-area: 1 / 1 / 2 / 2;
   }
 
   #imageFiltré{
-    grid-area: 1 / 2 / 2 / 3;;
+    border-style: solid;
+    border-color: #851680;
+    grid-area: 1 / 2 / 2 / 3;
+  }
+
+  #Filtres{
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+
+  }
+
+  #luminosite{
+    grid-area: 1 / 1 / 2 / 2;
+  }
+  #blur{
+    grid-area: 1 / 1 / 2 / 2;
+  }
+
+  #contour{
+    grid-area: 1 / 1 / 2 / 2;
+  }
+
+  #extension{
+    grid-area: 1 / 1 / 2 / 2;
+  }
+
+  #Boutons{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: 1fr;
+    grid-row-gap: 0px;
   }
 
   img {
     width: 300px; 
     height: 300px; 
   }
+
+  #cssmenu
+{
+    width:auto;
+    display:block;
+    text-align:center;
+    font-family:Oswald;
+    line-height:1.2;
+}
+#cssmenu ul
+{
+    width:auto;
+    display:block;
+    font-size:0;
+    text-align:center;
+    color:#851680;
+    background-color:white;
+    border: transparent;
+    margin:0; 
+    padding:0;
+    list-style:none;
+    position:relative;
+    z-index:999999990;
+    border-radius: 3px;
+} 
+
+#cssmenu li
+{
+    display:inline-block;
+    position:relative;    
+    font-size:0; 
+    margin:0;
+    padding:0;
+}
+
+#cssmenu >ul>li>span, #cssmenu >ul>li>a 
+{   
+    font-size:22px;
+    color:inherit;
+    text-decoration:none;
+    padding:14px 20px; 
+    font-weight:400;
+    text-transform:uppercase;
+    letter-spacing:2px;   
+    display:block;   
+    position:relative;
+    transition:all 0.3s;
+}
+#cssmenu li:hover > span, #cssmenu li:hover > a
+{  
+    color:#333333;
+    background-color:#F3F3F3;
+}
+
 </style>
