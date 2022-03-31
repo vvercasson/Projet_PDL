@@ -42,6 +42,22 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
     console.log(e.message);
   });
 
+  function showImageFilter(data){
+    target.value = data;
+    const reader = new window.FileReader();
+    reader.readAsDataURL(data);
+    reader.onload = () => {
+      const galleryElt = document.getElementById("imageFiltre");
+      if (galleryElt !== null) {
+        const imgElt = document.createElement("img");
+        imgElt.setAttribute("id","filtre");
+        galleryElt.appendChild(imgElt);
+        if (imgElt !== null && reader.result as string) {
+          imgElt.setAttribute("src", (reader.result as string)); 
+        }
+      }
+    }
+  }
   function supprImg(){
     api.deleteImage(props.id); // on applique la fonction qui efface l'image
     router.push({ name: 'home'}).then(() => {
@@ -111,6 +127,13 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
     }
   }
   function submitFilter(event){
+    const id = event.target.id;
+
+    
+    document.getElementById(id).disabled = true;
+    setTimeout(function(){document.getElementById(id).disabled = false;},500);
+
+
     const imageShow = document.getElementById("imageFiltre");
     if (imageShow !== null) {
       var varP = document.getElementById("filtre");
@@ -129,20 +152,7 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
       else{
         api.getImageFilterOneParameters(props.id,algo,first.value)
         .then((data : Blob) => {
-          target.value = data;
-          const reader = new window.FileReader();
-          reader.readAsDataURL(data);
-          reader.onload = () => {
-            const galleryElt = document.getElementById("imageFiltre");
-            if (galleryElt !== null) {
-              const imgElt = document.createElement("img");
-              imgElt.setAttribute("id","filtre");
-              galleryElt.appendChild(imgElt);
-              if (imgElt !== null && reader.result as string) {
-                imgElt.setAttribute("src", (reader.result as string)); 
-              }
-            }
-          };
+          showImageFilter(data);
         });
       }
     }
@@ -151,20 +161,7 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
       const algo = "contour";
       api.getImageFilterOnlyAlgo(props.id,algo)
       .then((data : Blob) => {
-        target.value = data;
-        const reader = new window.FileReader();
-        reader.readAsDataURL(data);
-        reader.onload = () => {
-        const galleryElt = document.getElementById("imageFiltre");
-        if (galleryElt !== null) {
-          const imgElt = document.createElement("img");
-          imgElt.setAttribute("id","filtre");
-          galleryElt.appendChild(imgElt);
-          if (imgElt !== null && reader.result as string) {
-            imgElt.setAttribute("src", (reader.result as string)); 
-          }
-        }
-      };
+        showImageFilter(data);
       });
     }
 
@@ -179,21 +176,7 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
         else{
           api.getImageFilterAllParameters(props.id,algo,first,size)
           .then((data : Blob) => {
-            target.value = data;
-            const reader = new window.FileReader();
-            reader.readAsDataURL(data);
-            reader.onload = () => {
-            const galleryElt = document.getElementById("imageFiltre");
-            if (galleryElt !== null) {
-              const imgElt = document.createElement("img");
-              imgElt.setAttribute("id","filtre");
-              galleryElt.appendChild(imgElt);
-              if (imgElt !== null && reader.result as string) {
-                imgElt.setAttribute("src", (reader.result as string)); 
-              }
-            }
-            
-          };
+            showImageFilter(data);
           }); 
         }
       }
@@ -201,21 +184,38 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
         const first = "gaussien";
         api.getImageFilterOneParameters(props.id,algo,first)
         .then((data : Blob) => {
-          target.value = data;
-          const reader = new window.FileReader();
-          reader.readAsDataURL(data);
-          reader.onload = () => {
-          const galleryElt = document.getElementById("imageFiltre");
-          if (galleryElt !== null) {
-            const imgElt = document.createElement("img");
-            imgElt.setAttribute("id","filtre");
-            galleryElt.appendChild(imgElt);
-            if (imgElt !== null && reader.result as string) {
-              imgElt.setAttribute("src", (reader.result as string)); 
-            }
-          }
-        };
+          showImageFilter(data);
         });
+      }
+    }
+    if (event.target.id == "extensionButton"){
+      if(selectValue == "Filtre Negatif"){
+        const algo = "negatif";
+        api.getImageFilterOnlyAlgo(props.id,algo)
+        .then((data : Blob) => {
+          showImageFilter(data);
+        });
+      }
+
+      if (selectValue == "Retourner Image"){
+        const algo = "rotate";
+        var first = document.getElementById("textretourner").value;
+        switch(first){
+          case "horizontal":
+            first = "h";
+            break;
+          case "vertical":
+            first = "v";
+            break;
+          case "les deux":
+            first = "b";
+            break;
+        }
+        api.getImageFilterOneParameters(props.id,algo,first)
+        .then((data : Blob) => {
+          showImageFilter(data);
+        });
+
       }
     }
 
@@ -228,15 +228,28 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
 
   function handleSelect(event) {
     selectValue = (event.target.value);
+    
+    if (selectValue == "Retourner Image"){
+      const divVisible = document.getElementById("reponseExtension")?.style.visibility;
+        if (divVisible == 'hidden') {
+          document.getElementById("reponseExtension").style.visibility = 'visible';
+        }
+    }
+    else{
+      const divVisible = document.getElementById("reponseExtension")?.style.visibility;
+        if (divVisible == 'visible') {
+          document.getElementById("reponseExtension").style.visibility = 'hidden';
+        }
+    }
 
     if(selectValue == "Moyen"){
-      const divVisible = document.getElementById("reponse")?.style.visibility;;
+      const divVisible = document.getElementById("reponse")?.style.visibility;
         if (divVisible == 'hidden') {
           document.getElementById("reponse").style.visibility = 'visible';
         }
     }
     else{
-      const divVisible = document.getElementById("reponse")?.style.visibility;;
+      const divVisible = document.getElementById("reponse")?.style.visibility;
         if (divVisible == 'visible') {
           document.getElementById("reponse").style.visibility = 'hidden';
         }
@@ -354,12 +367,19 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
         <h3 id="titleExtension">Extensions</h3>
         <select id="selectExtension" @change="handleSelect($event)">
           <option>Choisir un filtre</option>
+          <option>Filtre Negatif</option>
+          <option>Retourner Image</option>
         </select>
         <br>
         <div id="reponseExtension" style="visibility: hidden;">
+          <select id="textretourner">
+            <option>horizontal</option>
+            <option>vertical</option>
+            <option>les deux</option>
+          </select>
         </div> 
-        &nbsp;
-        <button id="blurButton" @click="submitFilter($event)">appliquer</button>
+        <br>
+        <button id="extensionButton" @click="submitFilter($event)">appliquer</button>
       </div>
 
       <div id = "histogramme" style="visibility: hidden;">
