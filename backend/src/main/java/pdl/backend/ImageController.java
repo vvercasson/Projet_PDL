@@ -44,6 +44,7 @@ import boofcv.struct.image.Planar;
 import imageprocessing.ColorLevelProcessing;
 import imageprocessing.Convolution;
 import imageprocessing.GrayLevelProcessing;
+import imageprocessing.TraitementImage;
 
 @RestController
 public class ImageController {
@@ -66,7 +67,6 @@ public class ImageController {
 
     if (image.isPresent()) {
       InputStream inputStream = new ByteArrayInputStream(image.get().getData());
-      boolean isPng = image.get().getName().endsWith("png");
 
       // No algorithm applied if param is empty -> simply return original image
       if(algorithm.isEmpty()) {
@@ -80,6 +80,7 @@ public class ImageController {
           input = ImageIO.read(inputStream);
           Planar<GrayU8> imagein = ConvertBufferedImage.convertFromPlanar(input, null, true, GrayU8.class);
           System.out.println("Num bands : " + imagein.getNumBands());
+          boolean isPng = TraitementImage.isPng(imagein);
           Planar<GrayU8> imageout = imagein.createSameShape();
 
           if(first.isEmpty()) {
@@ -87,9 +88,11 @@ public class ImageController {
             if(algorithm.get().equals("contour")) {
               GrayU8 transit = new GrayU8(imagein.width, imagein.height);
 
-              ColorLevelProcessing.convertToGray2(imagein,transit);
+              // ColorLevelProcessing.convertToGray2(imagein,transit);
+              TraitementImage.rgbToGrey(imagein, transit);
               GrayU8 end = new GrayU8(imagein.width, imagein.height);
-              Convolution.gradientImageSobel(transit, end);
+              // Convolution.gradientImageSobel(transit, end);
+              TraitementImage.contour(transit, end);
 
               ByteArrayOutputStream os = new ByteArrayOutputStream();
               BufferedImage output = ConvertBufferedImage.convertTo(end, null);
@@ -114,12 +117,11 @@ public class ImageController {
           }
           else {
             if(second.isEmpty()) {
-              System.out.println("here 0");
               // Seuls algo possibles : Luminosité
               // Recuperation parametre first
               if(algorithm.get().equals("luminosite")) {
-                int delta = Integer.parseInt(first.get());
-                ColorLevelProcessing.lightColor2(imagein,imageout, delta);          
+                int delta = Integer.parseInt(first.get());    
+                TraitementImage.luminosite(imagein,imageout, delta);
               }
               else if(algorithm.get().equals("flou")) {
                 String type = first.get();
@@ -131,7 +133,8 @@ public class ImageController {
                       {2,6,8,6,2},
                       {1,2,3,2,1}
                     };
-                  ColorLevelProcessing.convolutionColor(imagein, imageout, kernel);
+                  // ColorLevelProcessing.convolutionColor(imagein, imageout, kernel);
+                  TraitementImage.gaussien(imagein, imageout, kernel);
                 }
               }
               else {
@@ -144,7 +147,8 @@ public class ImageController {
                 String type = first.get();
                 int size = Integer.parseInt(second.get());
                 if(type.equals("moyen")) {
-                  ColorLevelProcessing.meanFilterColor(imagein, imageout, size);
+                  // ColorLevelProcessing.meanFilterColor(imagein, imageout, size);
+                  TraitementImage.flouMoyen(imagein, imageout, size);
                 }
                 else {
                   System.err.println("Unknown algorithm : " + algorithm.get());
@@ -158,12 +162,17 @@ public class ImageController {
           BufferedImage output = new BufferedImage(imagein.width, imagein.height, input.getType());
           ConvertBufferedImage.convertTo(imageout,output,true);
           // BufferedImage outBuffered = ConvertBufferedImage.convertTo_U8(imageout, null, false);
-          if(!ImageIO.write(output, "png", os)) {
-            System.err.println("** No writter found **");
-          }                          
+          if(isPng) {
+            ImageIO.write(output, "png", os);
+          }
+          else {
+            ImageIO.write(output, "jpg", os);
+          }                       
           InputStream is = new ByteArrayInputStream(os.toByteArray());
 
-          return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(new InputStreamResource(is));
+          if(isPng)
+            return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(new InputStreamResource(is));
+          return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(new InputStreamResource(is));
         } catch (IOException e1) {
           e1.printStackTrace();
         }        

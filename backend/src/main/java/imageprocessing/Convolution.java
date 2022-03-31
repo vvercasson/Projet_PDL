@@ -125,48 +125,4 @@ public class Convolution {
       }
     } 
   }
-
-  public static void main(final String[] args) {
-    // load image
-    if (args.length < 2) {
-      System.out.println("missing input or output image filename");
-      System.exit(-1);
-    }
-    final String inputPath = args[0];
-    GrayU8 input = UtilImageIO.loadImage(inputPath, GrayU8.class);
-    GrayU8 output = input.createSameShape();
-
-    //long time = System.nanoTime();
-    //meanFilterSimple(input, output,15);
-    //System.out.println("Time : "+(System.nanoTime()-time)+" nsec");
-    meanFilterWithBorders(input, output, 30, BorderType.SKIP);
-
-    int[][] kernel1 = {{1,1,1},
-                       {1,1,1},
-                       {1,1,1}
-                    };
-
-    int[][] kernel2 = {{1,2,3,2,1},
-                      {2,6,8,6,2},
-                      {3,8,10,8,3},
-                      {2,6,8,6,2},
-                      {1,2,3,2,1}
-                    };
-    
-    //long time = System.nanoTime();
-    //convolution(input, output, kernel2);
-    //System.out.println("Time : "+(System.nanoTime()-time));
-
-    //long time = System.nanoTime();
-    //GConvolveImageOps.convolve(kernel2d, input, output);
-    //System.out.println("Time : "+(System.nanoTime()-time));
-
-    //gradientImageSobel(input, output,'c');
-
-    // save output image
-    final String outputPath = args[1];
-    UtilImageIO.saveImage(output, outputPath);
-    System.out.println("Image saved in: " + outputPath);
-  }
-
 }

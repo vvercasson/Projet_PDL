@@ -241,4 +241,57 @@ public class ColorLevelProcessing {
 		}
 	}
 
+	public static void luminosite(Planar<GrayU8> input, Planar<GrayU8> output, int delta){		
+		// Valeur de vérification lors de l'application du filtre
+		int min = 0;
+		int max = 255;
+
+		// 1 bande = Image en noir et blanc sinon image en couleur
+		boolean isGrey = input.getNumBands() == 1? true:false;
+
+		// 4 bande = PNG
+		boolean isPng = input.getNumBands() == 4? true:false;
+		
+
+		// Si l'image est grise, on ne traite qu'une bande sinon 3 (peu importe png ou jpg)
+		int bandsToTreat = isGrey? 1:3;
+
+		if(isPng)
+			copyAlphaBand(input, output);
+
+		// Parcours tous les pixels
+		for (int y = 0; y < input.height; ++y) {
+			for (int x = 0; x < input.width; ++x) { 
+
+				// Parcours chaque bande de l'image
+				for (int i = 0; i < bandsToTreat; i++){
+
+					// Calcul de la nouvelle valeur de pixel
+					int gl = input.getBand(i).get(x, y) + delta;
+
+					// Verif borne inf.
+					if (gl < min)
+						output.getBand(i).set(x, y, 0);
+
+					// Verif borne sup.
+					else if(gl > max)
+						output.getBand(i).set(x, y, 255);
+					// Cas dit "normal"
+					else
+						output.getBand(i).set(x,y,gl);
+				}
+			}
+		}
+	}
+
+	public static void copyAlphaBand(Planar<GrayU8> input, Planar<GrayU8> output) {
+		System.out.println("Copying Alpha Band");
+		for (int y = 0; y < input.height; ++y) {
+			for (int x = 0; x < input.width; ++x) { 
+						output.getBand(3).set(x,y,input.getBand(3).get(x,y));
+				
+			}
+		}
+	} 
+
 }
