@@ -91,36 +91,37 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
     }
   }
 
+  function typeImage(type){
+    switch(type){
+          case "image/jpeg" || "image/jpg":
+            return "jpg";
+          case "image/png":
+            return "png";
+    }
+  }
+
   function saveImg(event){
     var id;
-    console.log(event.target);
+    var type =imageList.value[props.id].type;
+    type = typeImage(type);
     if(event.target.id == "btSave"){
       api.getImage(props.id)
       .then((data: Blob) =>{
         var url = window.URL.createObjectURL(data);
         var enregister = document.createElement('a');
         enregister.href = url;
-        var type = "";
-        switch(data.type){
-          case "image/jpeg" || "image/jpg":
-            type = "jpg";
-            break;
-          case "image/png":
-            type = "png";
-            break;
-        }
 
-      enregister.setAttribute('download','image.'+type); 
-      document.body.appendChild(enregister);
+        enregister.setAttribute('download','image.'+type); 
+        document.body.appendChild(enregister);
 
-      enregister.click(); 
+        enregister.click(); 
     });
     }
     else{
       var enregister = document.createElement('a');
       var url = window.URL.createObjectURL(target.value);
       enregister.href = url;
-      enregister.setAttribute('download','image.jpg'); 
+      enregister.setAttribute('download','image.'+type); 
       document.body.appendChild(enregister);
 
       enregister.click();
@@ -128,7 +129,8 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
   }
   function submitFilter(event){
     const id = event.target.id;
-
+    var affiche = false;
+    document.getElementById("btSaveFiltre").style.visibility = 'hidden';
     
     document.getElementById(id).disabled = true;
     setTimeout(function(){document.getElementById(id).disabled = false;},500);
@@ -145,8 +147,8 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
     if(event.target.id == "submitLight"){
       const algo = "luminosite";
       const first = document.getElementById("textLight");
-      if (first.value <= 0 || isNaN(first.value)){
-        alert("veuillez rentrer une valeur supérieur à 0 !");
+      if (first.value <= 0 || isNaN(first.value) || first.value > 255 ){
+        alert("veuillez rentrer une valeur entre 0 et 255 !");
       }
 
       else{
@@ -154,6 +156,7 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
         .then((data : Blob) => {
           showImageFilter(data);
         });
+        affiche = true;
       }
     }
 
@@ -163,6 +166,7 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
       .then((data : Blob) => {
         showImageFilter(data);
       });
+      affiche = true;
     }
 
     if(event.target.id == "blurButton"){
@@ -178,6 +182,7 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
           .then((data : Blob) => {
             showImageFilter(data);
           }); 
+          affiche = true;
         }
       }
       if(selectValue == "Gaussien"){
@@ -186,6 +191,7 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
         .then((data : Blob) => {
           showImageFilter(data);
         });
+        affiche = true;
       }
     }
     if (event.target.id == "extensionButton"){
@@ -195,6 +201,7 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
         .then((data : Blob) => {
           showImageFilter(data);
         });
+        affiche = true;
       }
 
       if (selectValue == "Retourner Image"){
@@ -215,14 +222,17 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
         .then((data : Blob) => {
           showImageFilter(data);
         });
+        affiche = true;
 
       }
     }
 
-    var divHide = document.getElementById("btSaveFiltre")?.style.visibility;
+    if (affiche == true){
+      var divHide = document.getElementById("btSaveFiltre")?.style.visibility;
       if (divHide == 'hidden') {
         document.getElementById("btSaveFiltre").style.visibility = 'visible';
       }
+    }
   }
 
 
@@ -426,6 +436,7 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
     border-style: solid;
     border-color: #851680;
     grid-area: 1 / 2 / 2 / 3;
+    display: inline-block;
   }
 
   #Filtres{

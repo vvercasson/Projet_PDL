@@ -9,8 +9,8 @@ function submitFile() {
   if(textUpload != null){
     textUpload.parentNode?.removeChild(textUpload);
   }
-
-  if (target.value?.files[0].type == "application/pdf"){
+  alert(target.value.files[0].type)
+  if (target.value?.files[0].type != "image/jpg" && target.value?.files[0].type != "image/jpeg" && target.value?.files[0].type != "image/png"){
     alert("Erreur de format, veuillez inserer une image png ou jpg");
   }
   else{
