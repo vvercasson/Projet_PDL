@@ -265,6 +265,13 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
           document.getElementById("reponseExtension").style.visibility = 'visible';
         }
     }
+    else{
+      const divVisible = document.getElementById("reponseExtension")?.style.visibility;
+        if (divVisible == 'visible') {
+          document.getElementById("reponseExtension").style.visibility = 'hidden';
+        }
+    }
+
     if (selectValue == "Filtre Bruit Gaussien"){
       const divVisible = document.getElementById("responseExtensionBruit")?.style.visibility;
         if (divVisible == 'hidden') {
@@ -272,9 +279,9 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
         }
     }
     else{
-      const divVisible = document.getElementById("reponseExtension")?.style.visibility;
+      const divVisible = document.getElementById("responseExtensionBruit")?.style.visibility;
         if (divVisible == 'visible') {
-          document.getElementById("reponseExtension").style.visibility = 'hidden';
+          document.getElementById("responseExtensionBruit").style.visibility = 'hidden';
         }
     }
 
@@ -316,6 +323,13 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
       var divHide = document.getElementById("blur")?.style.visibility;
       if (divHide == 'hidden') {
         document.getElementById("blur").style.visibility = 'visible';
+
+        if(document.getElementById("blur")?.childNodes[1].value == "Moyen"){
+          const divVisible = document.getElementById("reponse")?.style.visibility;
+          if (divVisible == 'hidden') {
+            document.getElementById("reponse").style.visibility = 'visible';
+          }
+        }
       }
     }
     if (menu == "menuContour"){
@@ -328,6 +342,18 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
       var divHide = document.getElementById("extension")?.style.visibility;
       if (divHide == 'hidden') {
         document.getElementById("extension").style.visibility = 'visible';
+      }
+      if(document.getElementById("extension")?.childNodes[1].value == "Filtre Bruit Gaussien"){
+          const divVisible = document.getElementById("responseExtensionBruit")?.style.visibility;
+          if (divVisible == 'hidden') {
+            document.getElementById("responseExtensionBruit").style.visibility = 'visible';
+          }
+      }
+      else if(document.getElementById("extension")?.childNodes[1].value == "Retourner Image"){
+          const divVisible = document.getElementById("reponseExtension")?.style.visibility;
+          if (divVisible == 'hidden') {
+            document.getElementById("reponseExtension").style.visibility = 'visible';
+          }
       }
     }
   }
