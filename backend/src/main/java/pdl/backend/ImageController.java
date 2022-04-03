@@ -149,6 +149,11 @@ public class ImageController {
                   TraitementImage.gaussien(imagein, imageout, kernel);
                 }
               }
+              else if (algorithm.get().equals("bruit")){
+                int niveauBruit = Integer.parseInt(first.get());
+                TraitementImage.bruitGaussien(imagein,imageout,niveauBruit);
+              }
+
               else {
                 System.err.println("Unknown algorithm : " + algorithm.get() );
                 return new ResponseEntity<>("Algorithm : " + algorithm.get() + " not found. 400 Bad Request", HttpStatus.BAD_REQUEST);

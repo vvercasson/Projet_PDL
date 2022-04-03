@@ -15,6 +15,13 @@ const target = ref<Blob>();
 
 var selectValue = "";
 
+function updateTextInput(val) {     
+  if(val.target.id == "rangeLight")
+    document.getElementById('rangeValue').value=val.target.value;
+  else if (val.target.id == "rangeBruit")
+    document.getElementById('rangeBruitValue').value=val.target.value;          
+} 
+
 api.getImageList() // fonction qui récupère la liste des images
   .then((data) => {
     imageList.value = data;
@@ -127,6 +134,8 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
       enregister.click();
     }
   }
+
+
   function submitFilter(event){
     const id = event.target.id;
     var affiche = false;
@@ -143,12 +152,13 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
     if(varP != null){
       varP.parentNode?.removeChild(varP);
     }
+
     console.log(event.target.id); // faire le if pour chaque filtre
     if(event.target.id == "submitLight"){
       const algo = "luminosite";
-      const first = document.getElementById("textLight");
-      if (first.value <= 0 || isNaN(first.value) || first.value > 255 ){
-        alert("veuillez rentrer une valeur entre 0 et 255 !");
+      const first = document.getElementById("rangeLight");
+      if (first.value < -255 || isNaN(first.value) || first.value > 255 ){
+        alert("veuillez rentrer une valeur entre -255 et 255 !");
       }
 
       else{
@@ -225,6 +235,16 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
         affiche = true;
 
       }
+
+      if (selectValue == "Filtre Bruit Gaussien"){
+        const algo = "bruit";
+        var first = document.getElementById("rangeBruit").value;
+        api.getImageFilterOneParameters(props.id,algo,first)
+        .then((data : Blob) => {
+          showImageFilter(data);
+        });
+        affiche = true;
+      }
     }
 
     if (affiche == true){
@@ -243,6 +263,12 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
       const divVisible = document.getElementById("reponseExtension")?.style.visibility;
         if (divVisible == 'hidden') {
           document.getElementById("reponseExtension").style.visibility = 'visible';
+        }
+    }
+    if (selectValue == "Filtre Bruit Gaussien"){
+      const divVisible = document.getElementById("responseExtensionBruit")?.style.visibility;
+        if (divVisible == 'hidden') {
+          document.getElementById("responseExtensionBruit").style.visibility = 'visible';
         }
     }
     else{
@@ -268,9 +294,13 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
   }
 
   function showFilters(event){
+
     document.getElementById("luminosite").style.visibility = 'hidden';
+    document.getElementById("reponse").style.visibility = 'hidden';
     document.getElementById("blur").style.visibility = 'hidden';
     document.getElementById("contour").style.visibility = 'hidden';
+    document.getElementById("reponseExtension").style.visibility = 'hidden';
+    document.getElementById("responseExtensionBruit").style.visibility = 'hidden';
     document.getElementById("extension").style.visibility = 'hidden';
 
 
@@ -282,6 +312,7 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
       }
     }
     if (menu == "menuBlur"){
+      var selected = document.getElementById("defaultMenuBlur");
       var divHide = document.getElementById("blur")?.style.visibility;
       if (divHide == 'hidden') {
         document.getElementById("blur").style.visibility = 'visible';
@@ -306,6 +337,7 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
 <template>
 
   <div id="menuDemo">
+    <h3 id="titleMenu">Choisissez un filtre :</h3>
     <div id="cssmenu">
       <ul>
           <li><a id="menuLumi" @click="showFilters($event)">Luminosité</a></li>
@@ -347,15 +379,18 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
   <div id="Filtres">
       <div id = "luminosite" style="visibility: hidden;">
         <h3 id="light">Luminosité</h3>
-        <input type="text" id="textLight" ref="text" placeholder="intensité">
         <br>
+        <div id="rangeDiv">
+          <input id = "rangeLight" type="range" min="-255" max="255" step="1" @change="updateTextInput($event)">
+          <input id="rangeValue" type="text" value="" readonly>
+        </div>
         <button id="submitLight" @click="submitFilter($event)">appliquer</button>
       </div>
 
       <div id = "blur" style="visibility: hidden;">
         <h3 id="titleBlur">Filtre flou</h3>
         <select id="selectBlur" @change="handleSelect($event)">
-          <option>Choisir un filtre</option>
+          <option id="defaultMenuBlur">Choisir un filtre</option>
           <option id="moyen">Moyen</option>
           <option id="gaussien">Gaussien</option>
         </select>
@@ -379,6 +414,7 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
           <option>Choisir un filtre</option>
           <option>Filtre Negatif</option>
           <option>Retourner Image</option>
+          <option>Filtre Bruit Gaussien</option>
         </select>
         <br>
         <div id="reponseExtension" style="visibility: hidden;">
@@ -387,7 +423,11 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
             <option>vertical</option>
             <option>les deux</option>
           </select>
-        </div> 
+        </div>
+        <div id="responseExtensionBruit" style="visibility: hidden;">
+          <input id = "rangeBruit" type="range" min="0" max="255" step="1" @change="updateTextInput($event)">
+          <input id="rangeBruitValue" type="text" value="" readonly>
+        </div>
         <br>
         <button id="extensionButton" @click="submitFilter($event)">appliquer</button>
       </div>
@@ -432,6 +472,7 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
     grid-area: 1 / 1 / 2 / 2;
   }
 
+
   #imageFiltré{
     border-style: solid;
     border-color: #851680;
@@ -446,6 +487,14 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
     grid-column-gap: 0px;
     grid-row-gap: 0px;
 
+  }
+
+  #rangeValue{
+    width: 30px;
+  }
+
+  #rangeBruitValue{
+    width: 30px;
   }
 
   #luminosite{
@@ -475,16 +524,20 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
     height: 300px; 
   }
 
-  #cssmenu
-{
+  #cssmenu {
     width:auto;
     display:block;
     text-align:center;
     font-family:Oswald;
     line-height:1.2;
-}
-#cssmenu ul
-{
+  }
+
+  #titleMenu{
+    font-family:Oswald;
+    font-size:20px;
+  }
+
+  #cssmenu ul {
     width:auto;
     display:block;
     font-size:0;
@@ -498,19 +551,17 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
     position:relative;
     z-index:999999990;
     border-radius: 3px;
-} 
+  } 
 
-#cssmenu li
-{
+  #cssmenu li {
     display:inline-block;
     position:relative;    
     font-size:0; 
     margin:0;
     padding:0;
-}
+  }
 
-#cssmenu >ul>li>span, #cssmenu >ul>li>a 
-{   
+  #cssmenu >ul>li>span, #cssmenu >ul>li>a {   
     font-size:22px;
     color:inherit;
     text-decoration:none;
@@ -521,11 +572,11 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
     display:block;   
     position:relative;
     transition:all 0.3s;
-}
-#cssmenu li:hover > span, #cssmenu li:hover > a
-{  
+  }
+
+  #cssmenu li:hover > span, #cssmenu li:hover > a {  
     color:#333333;
     background-color:#F3F3F3;
-}
+  }
 
 </style>

@@ -66,6 +66,42 @@ public class TraitementImage {
 		}
 	}
 
+	public static Planar<GrayU8> bruitGaussien(Planar<GrayU8> image, Planar<GrayU8> output,int bruitVal) {
+        int result;
+        int valeurAvecBruit;
+        double gaussian;
+		int niveauBruit = bruitVal;
+		if (niveauBruit > 255)
+			niveauBruit = 255;
+		if (niveauBruit < 0)
+			niveauBruit = 0;
+
+        int nbBands  = output.getNumBands();
+        int width  = image.getWidth();
+        int height = image.getHeight();
+        java.util.Random randGen = new java.util.Random();
+          
+        for (int j=0; j<height; j++) {
+            for (int i=0; i<width; i++) {
+                gaussian = randGen.nextGaussian();
+                  
+                for (int b=0; b<nbBands; b++) {
+                    valeurAvecBruit = niveauBruit * (int)gaussian;
+                    result = image.getBand(b).get(i, j);
+                    valeurAvecBruit = valeurAvecBruit + result;
+                    if (valeurAvecBruit < 0)   
+						valeurAvecBruit = 0;
+                    if (valeurAvecBruit > 255) 
+						valeurAvecBruit = 255;
+                      
+                    output.getBand(b).set(i,j,(int)valeurAvecBruit);
+                }
+            }
+        }
+          
+        return output;
+    }
+
 	public static void negatif(Planar<GrayU8> input, Planar<GrayU8> output){		
 		// 1 bande = Image en noir et blanc sinon image en couleur
 		boolean isGrey = isGrey(input);
