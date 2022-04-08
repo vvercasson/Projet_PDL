@@ -245,6 +245,15 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
         });
         affiche = true;
       }
+
+      if (selectValue == "Filtre Miroir"){
+        const algo= "miroir";
+        api.getImageFilterOnlyAlgo(props.id,algo)
+        .then((data : Blob) => {
+          showImageFilter(data);
+        });
+        affiche = true;
+      }
     }
 
     if (affiche == true){
@@ -441,6 +450,7 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
           <option>Filtre Negatif</option>
           <option>Retourner Image</option>
           <option>Filtre Bruit Gaussien</option>
+          <option>Filtre Miroir</option>
         </select>
         <br>
         <div id="reponseExtension" style="visibility: hidden;">
