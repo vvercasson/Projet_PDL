@@ -66,7 +66,20 @@ public class TraitementImage {
 		}
 	}
 
-	public static Planar<GrayU8> bruitGaussien(Planar<GrayU8> image, Planar<GrayU8> output,int bruitVal) {
+	public static Planar<GrayU8> bruitGaussien(Planar<GrayU8> input, Planar<GrayU8> output,int bruitVal) {
+		// 1 bande = Image en noir et blanc sinon image en couleur
+		boolean isGrey = isGrey(input);
+
+		// 4 bande = PNG
+		boolean isPng = isPng(input);
+		
+
+		// Si l'image est grise, on ne traite qu'une bande sinon 3 (peu importe png ou jpg)
+		int bandsToTreat = isGrey? 1:3;
+
+		if(isPng)
+			copyAlphaBand(input, output);
+
         int result;
         int valeurAvecBruit;
         double gaussian;
@@ -76,18 +89,17 @@ public class TraitementImage {
 		if (niveauBruit < 0)
 			niveauBruit = 0;
 
-        int nbBands  = output.getNumBands();
-        int width  = image.getWidth();
-        int height = image.getHeight();
+        int width  = input.getWidth();
+        int height = input.getHeight();
         java.util.Random randGen = new java.util.Random();
           
         for (int j=0; j<height; j++) {
             for (int i=0; i<width; i++) {
                 gaussian = randGen.nextGaussian();
                   
-                for (int b=0; b<nbBands; b++) {
+                for (int b=0; b<bandsToTreat; b++) {
                     valeurAvecBruit = niveauBruit * (int)gaussian;
-                    result = image.getBand(b).get(i, j);
+                    result = input.getBand(b).get(i, j);
                     valeurAvecBruit = valeurAvecBruit + result;
                     if (valeurAvecBruit < 0)   
 						valeurAvecBruit = 0;
@@ -302,6 +314,44 @@ public class TraitementImage {
 		} 
 	  }
 	
+	  public static void miroir(Planar<GrayU8> input, Planar<GrayU8> output) {
+		int width = input.width;
+		int halfwidth = 0;
+		if(width%2 == 0) {
+			halfwidth = width/2;
+		}
+		else {
+			halfwidth = (width-1)/2;
+		}
+
+		// 1 bande = Image en noir et blanc sinon image en couleur
+		boolean isGrey = isGrey(input);
+
+		// 4 bande = PNG
+		boolean isPng = isPng(input);
+						
+		// Si l'image est grise, on ne traite qu'une bande sinon 3 (peu importe png ou jpg)
+		int bandsToTreat = isGrey? 1:3;
+				
+		if(isPng)
+			copyAlphaBand(input, output);
+
+		// Parcours tous les pixels
+		for (int y = 0; y < input.height; ++y) {
+			int cmptMirroir = halfwidth;
+			for (int x = 0; x < input.width/2; ++x) {
+				
+				for (int i = 0; i < bandsToTreat; i++){
+					int value = input.getBand(i).get(x, y);
+					int value2 = input.getBand(i).get(cmptMirroir, y);
+					output.getBand(i).set(x, y, value);
+					output.getBand(i).set(x+halfwidth, y, value2);
+				}
+				cmptMirroir--;
+			}
+		}
+	}
+
 	// transitions RGB / HSV / GREY
 	public static void rgbToGrey(Planar<GrayU8> input, GrayU8 output) {
 		for (int y = 0; y < input.height;y++) {

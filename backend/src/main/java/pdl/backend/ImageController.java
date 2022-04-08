@@ -118,6 +118,9 @@ public class ImageController {
             else if(algorithm.get().equals("negatif")) {
               TraitementImage.negatif(imagein, imageout);
             }
+            else if(algorithm.get().equals("miroir") ) {
+              TraitementImage.miroir(imagein, imageout);
+            }
             else {
               System.err.println("Unknown algorithm : " + algorithm.get() );
               return new ResponseEntity<>("Algorithm : " + algorithm.get() + " not found. 400 Bad Request", HttpStatus.BAD_REQUEST); 
