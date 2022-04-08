@@ -49,18 +49,18 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
     console.log(e.message);
   });
 
-  function showImageFilter(data){
+  function showImageFilter(data){ // fonction qui affiche l'image filtré
     target.value = data;
-    const reader = new window.FileReader();
+    const reader = new window.FileReader(); // créer un reader de la page pour récuperer les données
     reader.readAsDataURL(data);
     reader.onload = () => {
-      const galleryElt = document.getElementById("imageFiltre");
-      if (galleryElt !== null) {
+      const galleryElt = document.getElementById("imageFiltre"); // recupération du div de l'image filtré
+      if (galleryElt !== null) {                                 // creation de la balise img
         const imgElt = document.createElement("img");
         imgElt.setAttribute("id","filtre");
         galleryElt.appendChild(imgElt);
         if (imgElt !== null && reader.result as string) {
-          imgElt.setAttribute("src", (reader.result as string)); 
+          imgElt.setAttribute("src", (reader.result as string));  // on met le result du Blob dans la balise img
         }
       }
     }
@@ -98,7 +98,7 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
     }
   }
 
-  function typeImage(type){
+  function typeImage(type){ // fonction de typage d'une image img ou png
     switch(type){
           case "image/jpeg" || "image/jpg":
             return "jpg";
@@ -107,24 +107,24 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
     }
   }
 
-  function saveImg(event){
+  function saveImg(event){ // fonction de sauvegarde des images (filtrées ou non)
     var id;
-    var type =imageList.value[props.id].type;
+    var type =imageList.value[props.id].type; // recupère le type de l'image selectionné
     type = typeImage(type);
-    if(event.target.id == "btSave"){
+    if(event.target.id == "btSave"){ // creation d'un Blob pour sauvegarder l'image non filtré
       api.getImage(props.id)
       .then((data: Blob) =>{
         var url = window.URL.createObjectURL(data);
         var enregister = document.createElement('a');
         enregister.href = url;
 
-        enregister.setAttribute('download','image.'+type); 
+        enregister.setAttribute('download','image.'+type); // telecharge l'image
         document.body.appendChild(enregister);
 
         enregister.click(); 
     });
     }
-    else{
+    else{ // creation d'un Blob pour sauvegarder l'image filtré
       var enregister = document.createElement('a');
       var url = window.URL.createObjectURL(target.value);
       enregister.href = url;
@@ -138,11 +138,11 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
 
   function submitFilter(event){
     const id = event.target.id;
-    var affiche = false;
+    var affiche = false; // variable d'affichage pour les selecteurs
     document.getElementById("btSaveFiltre").style.visibility = 'hidden';
     
     document.getElementById(id).disabled = true;
-    setTimeout(function(){document.getElementById(id).disabled = false;},500);
+    setTimeout(function(){document.getElementById(id).disabled = false;},500); // bouton de disable pour éviter de spamer le chargement des images
 
 
     const imageShow = document.getElementById("imageFiltre");
@@ -153,18 +153,19 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
       varP.parentNode?.removeChild(varP);
     }
 
-    console.log(event.target.id); // faire le if pour chaque filtre
+    // générations des éléments des filtres
+
     if(event.target.id == "submitLight"){
       const algo = "luminosite";
       const first = document.getElementById("rangeLight");
-      if (first.value < -255 || isNaN(first.value) || first.value > 255 ){
+      if (first.value < -255 || isNaN(first.value) || first.value > 255 ){ // vérification de la validité des valeurs
         alert("veuillez rentrer une valeur entre -255 et 255 !");
       }
 
       else{
-        api.getImageFilterOneParameters(props.id,algo,first.value)
+        api.getImageFilterOneParameters(props.id,algo,first.value) // voir dans http-api.ts pour la definition de la méthode
         .then((data : Blob) => {
-          showImageFilter(data);
+          showImageFilter(data); // application de la fonction pour l'image courante
         });
         affiche = true;
       }
@@ -256,7 +257,8 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
       }
     }
 
-    if (affiche == true){
+
+    if (affiche == true){ // affiche le bouton que quand un filtre est utilisé
       var divHide = document.getElementById("btSaveFiltre")?.style.visibility;
       if (divHide == 'hidden') {
         document.getElementById("btSaveFiltre").style.visibility = 'visible';
@@ -265,9 +267,11 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
   }
 
 
-  function handleSelect(event) {
+  function handleSelect(event) { // fonction pour gérer la lisibilité des div 
     selectValue = (event.target.value);
     
+
+    // Filtre retourner image
     if (selectValue == "Retourner Image"){
       const divVisible = document.getElementById("reponseExtension")?.style.visibility;
         if (divVisible == 'hidden') {
@@ -281,6 +285,8 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
         }
     }
 
+
+    // Filtre bruit gaussien
     if (selectValue == "Filtre Bruit Gaussien"){
       const divVisible = document.getElementById("responseExtensionBruit")?.style.visibility;
         if (divVisible == 'hidden') {
@@ -294,6 +300,8 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
         }
     }
 
+
+    // Filtre moyen
     if(selectValue == "Moyen"){
       const divVisible = document.getElementById("reponse")?.style.visibility;
         if (divVisible == 'hidden') {
@@ -311,6 +319,8 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
 
   function showFilters(event){
 
+
+    // on remet tout les div en hidden pour éviter de les superposer
     document.getElementById("luminosite").style.visibility = 'hidden';
     document.getElementById("reponse").style.visibility = 'hidden';
     document.getElementById("blur").style.visibility = 'hidden';
@@ -320,13 +330,19 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
     document.getElementById("extension").style.visibility = 'hidden';
 
 
-    var menu = event.target.id;
+    var menu = event.target.id; // recupération de l'id des menu
+
+    // maj de la lisibilité à visible pour la selection
+
+    // Menu de la luminosité
     if (menu == "menuLumi"){
       var divHide = document.getElementById("luminosite")?.style.visibility;
       if (divHide == 'hidden') {
         document.getElementById("luminosite").style.visibility = 'visible';
       }
     }
+
+    // Menu du filtre flou
     if (menu == "menuBlur"){
       var selected = document.getElementById("defaultMenuBlur");
       var divHide = document.getElementById("blur")?.style.visibility;
@@ -341,12 +357,16 @@ api.getImage(props.id) // fonction qui recupere l'image avec l'id
         }
       }
     }
+
+    // Menu du filtre contour
     if (menu == "menuContour"){
       var divHide = document.getElementById("contour")?.style.visibility;
       if (divHide == 'hidden') {
         document.getElementById("contour").style.visibility = 'visible';
       }
     }
+
+    // Menu des extensions
     if (menu == "menuExtensions"){
       var divHide = document.getElementById("extension")?.style.visibility;
       if (divHide == 'hidden') {

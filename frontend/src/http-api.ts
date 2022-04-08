@@ -18,8 +18,14 @@ const requests = {
 export const api = {
   getImageList: (): Promise<ImageType[]> => requests.get('images', {}),
   getImage: (id: number): Promise<Blob> => requests.get(`images/${id}`, { responseType: "blob" }),
+  
+  // getImageFiltre avec 2 paramètres passés pour appliquer le filtre
   getImageFilterAllParameters: (id: number, algo: string, first: string, second: string): Promise<Blob> => requests.get(`images/${id}?algorithm=${algo}&first=${first}&second=${second}`,{responseType: "blob"}),
+
+  // getImageFiltre avec un seul paramètres passés pour appliquer le filtre
   getImageFilterOneParameters: (id: number, algo: string, first: string): Promise<Blob> => requests.get(`images/${id}?algorithm=${algo}&first=${first}`,{responseType: "blob"}),
+
+  // getImageFiltre sans paramètres passés pour appliquer le filtre
   getImageFilterOnlyAlgo: (id: number, algo: string): Promise<Blob> => requests.get(`images/${id}?algorithm=${algo}`,{responseType: "blob"}),  
   createImage: (form: FormData): Promise<ImageType> => requests.post('images', form),
   deleteImage: (id: number): Promise<void> => requests.delete(`images/${id}`),
